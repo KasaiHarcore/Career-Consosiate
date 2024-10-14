@@ -82,50 +82,47 @@ class GroqModel(Model):
         Calls the Groq API to generate completions for the given inputs.
         """
         
-        if chat_mode:
-            pass
         # FIXME: ignore tools field since we don't use tools now
-        else:
-            try:
-                # groq models - prefilling response with { increase the success rate
-                # of producing json output
-                prefill_content = "{"
-                if response_format == "json_object":  # prefill
-                    messages.append({"role": "assistant", "content": prefill_content})
+        try:
+            # groq models - prefilling response with { increase the success rate
+            # of producing json output
+            prefill_content = "{"
+            if response_format == "json_object":  # prefill
+                messages.append({"role": "assistant", "content": prefill_content})
 
-                response = litellm.completion(
-                    model=self.name,
-                    messages=messages,
-                    temperature=common.MODEL_TEMP,
-                    max_tokens=4096,
-                    top_p=top_p,
-                    stream=False,
-                )
-                assert isinstance(response, ModelResponse)
-                resp_usage = response.usage
-                assert resp_usage is not None
-                input_tokens = int(resp_usage.prompt_tokens)
-                output_tokens = int(resp_usage.completion_tokens)
-                cost = self.calc_cost(input_tokens, output_tokens)
+            response = litellm.completion(
+                model=self.name,
+                messages=messages,
+                temperature=common.MODEL_TEMP,
+                max_tokens=4096,
+                top_p=top_p,
+                stream=False,
+            )
+            assert isinstance(response, ModelResponse)
+            resp_usage = response.usage
+            assert resp_usage is not None
+            input_tokens = int(resp_usage.prompt_tokens)
+            output_tokens = int(resp_usage.completion_tokens)
+            cost = self.calc_cost(input_tokens, output_tokens)
 
-                common.thread_cost.process_cost += cost
-                common.thread_cost.process_input_tokens += input_tokens
-                common.thread_cost.process_output_tokens += output_tokens
+            common.thread_cost.process_cost += cost
+            common.thread_cost.process_input_tokens += input_tokens
+            common.thread_cost.process_output_tokens += output_tokens
 
-                first_resp_choice = response.choices[0]
-                assert isinstance(first_resp_choice, Choices)
-                resp_msg: Message = first_resp_choice.message
-                content = self.extract_resp_content(resp_msg)
-                if response_format == "json_object":
-                    # prepend the prefilled character
-                    if not content.startswith(prefill_content):
-                        content = prefill_content + content
-                return content, cost, input_tokens, output_tokens
+            first_resp_choice = response.choices[0]
+            assert isinstance(first_resp_choice, Choices)
+            resp_msg: Message = first_resp_choice.message
+            content = self.extract_resp_content(resp_msg)
+            if response_format == "json_object":
+                # prepend the prefilled character
+                if not content.startswith(prefill_content):
+                    content = prefill_content + content
+            return content, cost, input_tokens, output_tokens
 
-            except BadRequestError as e:
-                if e.code == "context_length_exceeded":
-                    log_and_print("Context length exceeded")
-                raise e
+        except BadRequestError as e:
+            if e.code == "context_length_exceeded":
+                log_and_print("Context length exceeded")
+            raise e
 
 class Llama3_8B(GroqModel):
     def __init__(self):
