@@ -1,0 +1,37 @@
+{
+  "candidate_report": {
+    "overview": {
+      "strengths": [
+        "Không có"
+      ],
+      "weaknesses": [
+        "Ứng viên không trả lời câu hỏi phỏng vấn một cách thích hợp.",
+        "Câu trả lời không liên quan và khó hiểu.",
+        "Thiếu sự chuẩn bị cho buổi phỏng vấn.",
+        "Không thể hiện được kỹ năng giao tiếp."
+      ],
+      "overall_fit_score": 1
+    },
+    "detailed_analysis": {
+      "response_quality": {
+        "relevance_score": 1,
+        "completeness_score": 1,
+        "persuasiveness_score": 1,
+        "examples_score": 1
+      },
+      "communication_skills": {
+        "clarity_score": 1,
+        "filler_words_score": 10,
+        "fluency_score": 1,
+        "confidence_score": 1
+      },
+      "final_evaluation": {
+        "key_strengths": [
+          "Không có"
+        ],
+        "position_fit_score": 1,
+        "final_comments": "Ứng viên đưa ra câu trả lời không liên quan và khó hiểu.  Cần làm rõ lại câu hỏi và yêu cầu ứng viên trả lời đúng trọng tâm. Khả năng giao tiếp kém, không thể hiện được bất kỳ kỹ năng hay kinh nghiệm nào liên quan đến vị trí ứng tuyển."
+      }
+    }
+  }
+}
