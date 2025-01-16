@@ -153,7 +153,7 @@ class OpenaiModel(Model):
         return result
 
     # FIXME: the returned type contains OpenAI specific Types, which should be avoided
-    @retry(wait=wait_random_exponential(min=30, max=600), stop=stop_after_attempt(3))
+    @retry(wait=wait_random_exponential(min=30, max=600), stop=stop_after_attempt(5))
     def call(
         self,
         messages: list[dict],

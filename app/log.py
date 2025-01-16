@@ -8,10 +8,6 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 from rich.prompt import Prompt
 
-welcome_message_chat = """
-Welcome to the C&C, this is a demo for AI in HR.
-"""
-
 def terminal_width():
     return get_terminal_size().columns
 
@@ -32,16 +28,16 @@ def print_banner(msg: str) -> None:
 
     banner = f" {msg} ".center(WIDTH, "=")
     console.print()
-    console.print(banner, style="bold")
+    console.print(banner, style = "bold")
     console.print()
         
-def print_user(
+def print_error(
     msg: str, desc = "", print_callback: Callable[[dict], None] | None = None
 ) -> None:
     if not print_stdout:
         return
 
-    name = "Request"
+    name = "Error"
     if desc:
         title = f"{name} ({desc})"
     else:
@@ -50,9 +46,9 @@ def print_user(
     panel = Panel(
         msg,
         title=title,
-        title_align="left",
-        border_style="green",
-        width=WIDTH,
+        title_align = "left",
+        border_style = "red",
+        width = WIDTH,
     )
     console.print(panel)
 
@@ -70,7 +66,7 @@ def print_output(
 
     markdown = Markdown(msg)
 
-    name = "Output"
+    name = "System"
     if desc:
         title = f"{name} ({desc})"
     else:
@@ -81,7 +77,7 @@ def print_output(
         title = title,
         title_align = "left",
         border_style = "cyan",
-        width=WIDTH,
+        width = WIDTH,
     )
     console.print(panel)
 
@@ -92,7 +88,7 @@ def print_output(
 
 
 def print_llm(
-    msg: str, desc="", print_callback: Callable[[dict], None] | None = None
+    msg: str, desc = "", print_callback: Callable[[dict], None] | None = None
 ) -> None:
     if not print_stdout:
         return
@@ -110,7 +106,7 @@ def print_llm(
         title=title,
         title_align = "left",
         border_style = "blue",
-        width=WIDTH,
+        width = WIDTH,
     )
     console.print(panel)
     if print_callback:

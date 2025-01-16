@@ -1,4 +1,4 @@
-from app.model import claude, common, gpt, groq
+from app.model import claude, common, gpt, groq, openrouter
 
 
 def register_all_models() -> None:
@@ -29,6 +29,9 @@ def register_all_models() -> None:
     common.register_model(groq.Gemma_7B())
     common.register_model(groq.Llama_31_70B())
     common.register_model(groq.Llama_31_8B_8192())
+    
+    common.register_model(openrouter.GPT4())
+    common.register_model(openrouter.Llama31_405B_Instruct())
 
     # register default model as selected
     common.SELECTED_MODEL = gpt.Gpt35_Turbo0125()

@@ -65,12 +65,12 @@ class AnthropicModel(Model):
         else:
             return content
 
-    @retry(wait=wait_random_exponential(min=30, max=600), stop=stop_after_attempt(3))
+    @retry(wait=wait_random_exponential(min = 30, max = 600), stop = stop_after_attempt(5))
     def call(
         self,
         messages: list[dict],
         top_p = 1,
-        tools=None,
+        tools = None,
         response_format: Literal["text", "json_object"] = "text",
         **kwargs,
     ):
@@ -83,12 +83,12 @@ class AnthropicModel(Model):
                 messages.append({"role": "assistant", "content": prefill_content})
 
             response = litellm.completion(
-                model=self.name,
-                messages=messages,
-                temperature=common.MODEL_TEMP,
-                max_tokens=4096,
-                top_p=top_p,
-                stream=False,
+                model = self.name,
+                messages = messages,
+                temperature = common.MODEL_TEMP,
+                max_tokens = 4096,
+                top_p = top_p,
+                stream = False,
             )
             assert isinstance(response, ModelResponse)
             resp_usage = response.usage

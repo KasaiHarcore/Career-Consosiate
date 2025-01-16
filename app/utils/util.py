@@ -1,20 +1,6 @@
 import re
 import json
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-
-
-def extract_json(text: str) -> str:
-    """
-    Extracts the JSON script from the given text.
-    """
-    pattern = r'(?<=```json\n)(.*?)(?=```$)'
-    match = re.search(pattern, text, re.DOTALL)
-    json_script = match.group(0)
-    return json_script + "]"
-
-
 def data_filter(output: str) -> dict:
     """
     Parses the JSON string and extracts relevant sections.
@@ -25,56 +11,51 @@ def data_filter(output: str) -> dict:
     Returns:
     - dict: A dictionary containing parsed data for each section.
     """
+    output_list = re.findall(r"```(.*?)```", output, re.DOTALL)
+    if output_list:
+        output = output_list[0]
+    else:
+        pass  # Handle this case as needed
+
     try:
         # Parse the JSON string
-        json_data = json.loads(output)
-        
-        # If the JSON data is a list, take the first element
-        if isinstance(json_data, list):
-            json_data = json_data[0]
-        
+        json_data = json.loads(output.strip())
+
         # Extract sections with default empty structures if not present
-        education = json_data.get('Education', [])
-        experience = json_data.get('Experience', [])
-        skills = json_data.get('Skills', [])
-        
-        return {
+        job_title = json_data.get("job_category", "")
+        education = json_data.get("education_degree", [])
+        experience = json_data.get("experience", 0)
+        hskills = json_data.get("hard_skill", [])
+        certificates = json_data.get("certificates", [])
+        sskill = json_data.get("soft_skill", [])
+        summary = json_data.get("summary_cv", "")
+        score = json_data.get("fit_score", 0.0)
+        explanation = json_data.get("explanation", "")
+
+        result = {
+            'Category': job_title,
             'Education': education,
             'Experience': experience,
-            'Skills': skills,
+            'Technical Skills': hskills,
+            'Certificates': certificates,
+            'Soft Skills': sskill,
+            'Summary Comment': summary,
+            'Score': score,
+            'Explanation': explanation,
         }
-        
+        return result
+
     except json.JSONDecodeError as e:
-        print(f"JSON decoding failed: {e}")
+        # Handle JSON decoding errors
+        print(f"Error decoding JSON: {e}")
         return {
+            'Category': "",
             'Education': [],
-            'Experience': [],
-            'Skills': [],
+            'Experience': 0,
+            'Technical Skills': [],
+            'Certificates': [],
+            'Soft Skills': [],
+            'Summary Comment': "",
+            'Score': 0.0,
+            'Explanation': "",
         }
-        
-def get_tfidf_vectorizer(corpus: list[str]) -> TfidfVectorizer:
-    """
-    Returns a TfidfVectorizer object with the given corpus.
-
-    Parameters:
-    - corpus (list[str]): A list of strings to fit the vectorizer.
-
-    Returns:
-    - TfidfVectorizer: A TfidfVectorizer object fitted with the corpus.
-    """
-    vectorizer = TfidfVectorizer(stop_words = 'english')
-    vectorizer.fit(corpus)
-    return vectorizer
-
-def get_cosine_similarity(matrix_1, matrix_2):
-    """
-    Calculate the cosine similarity between two matrices.
-
-    Parameters:
-    - matrix_1 (array-like): The first matrix.
-    - matrix_2 (array-like): The second matrix.
-
-    Returns:
-    - array-like: The cosine similarity between the two matrices.
-    """
-    return cosine_similarity(matrix_1, matrix_2)
