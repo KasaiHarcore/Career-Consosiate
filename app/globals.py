@@ -1,8 +1,8 @@
 import os
 
 # Set your GROQ API key securely (avoid hardcoding in production)
-os.environ['OPENROUTER_API_KEY'] = "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"
-os.environ['GROQ_API_KEY'] = "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"
+os.environ['OPENROUTER_API_KEY'] = "Your OpenRouter Key"
+os.environ['GROQ_API_KEY'] = "Your GROQ Key"
 
 default_working_folder = "./data/NEW"
 
