@@ -15,6 +15,7 @@ from app import log, globals
 
 import os
 import argparse
+import pandas as pd
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -29,6 +30,19 @@ if __name__ == "__main__":
         type = str,
         default = globals.default_working_folder,
         help = "The folder containing resumes to parse.",
+    )
+    
+    parser.add_argument(
+        "--job_description",
+        type = str,
+        default = globals.job_description,
+        help = "The job description to compare the resumes against.",
+    )
+    
+    parser.add_argument(
+        "--custom_prompt",
+        type = str,
+        help = "The custom prompt to use for the scoring system.",
     )
     args = parser.parse_args()
 
@@ -52,21 +66,30 @@ if __name__ == "__main__":
     register_all_models()
 
     # Set the desired model
-    common.set_model('openrouter/meta-llama/llama-3.1-405b-instruct:free')
+    common.set_model('openrouter/meta-llama/llama-3.1-70b-instruct:free')
 
     # Parsing process
     log.print_output("Parsing resumes...")
-    parse_resumes(folder_path, data)
+    parse_resumes(folder_path, data, args.job_description, args.custom_prompt)
             
     # Save the data
     if len(globals.failed) > 0:
-        with open("failed.txt", "w", encoding = "utf-8") as f:
+        with open("./data/failed.txt", "w", encoding = "utf-8") as f:
             for item in globals.failed:
                 f.write(str(item) + "\n")
             print("Failed resumes saved in failed.txt")
             
     log.print_output("Saving data...")
-    data.to_csv(f"{folder_path}/Results.csv", index = False)
+        
+    results_path = os.path.join(folder_path, "Results.csv")
+    if os.path.exists(results_path):
+        old_df = pd.read_csv(results_path)
+        final_df = pd.concat([old_df, data], ignore_index=True)
+        final_df.drop_duplicates(subset=["File"], keep="first", inplace=True)
+    else:
+        final_df = data
+    final_df.to_csv(results_path, index=False)
+    
     log.print_output("Data saved at Results.csv")
     
     log.print_banner("Process completed.")
@@ -74,7 +97,7 @@ if __name__ == "__main__":
     # Chat Section
     log.print_banner("Starting client...")
 
-    app.launch()
+    app.launch(debug = True)
         
 
     

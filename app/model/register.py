@@ -32,6 +32,9 @@ def register_all_models() -> None:
     
     common.register_model(openrouter.GPT4())
     common.register_model(openrouter.Llama31_405B_Instruct())
+    common.register_model(openrouter.Llama31_70B_Instruct())
+    common.register_model(openrouter.Qwen2_7B_Instruct())
+    common.register_model(openrouter.Gemma2_9B())
 
     # register default model as selected
     common.SELECTED_MODEL = gpt.Gpt35_Turbo0125()

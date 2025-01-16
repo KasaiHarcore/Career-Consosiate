@@ -137,3 +137,24 @@ class Llama31_405B_Instruct(OPModel):
             "openrouter/meta-llama/llama-3.1-405b-instruct:free", 0, 0, parallel_tool_call=True
         )
         self.note = "Llama 3.1 405B Instruct model"
+        
+class Llama31_70B_Instruct(OPModel):
+    def __init__(self):
+        super().__init__(
+            "openrouter/meta-llama/llama-3.1-70b-instruct:free", 0, 0, parallel_tool_call=True
+        )
+        self.note = "Llama 3.1 70B Instruct model"
+        
+class Qwen2_7B_Instruct(OPModel):
+    def __init__(self):
+        super().__init__(
+            "openrouter/qwen/qwen-2-7b-instruct:free", 0, 0, parallel_tool_call=True
+        )
+        self.note = "Qwen 2.7B Instruct model"
+        
+class Gemma2_9B(OPModel):
+    def __init__(self):
+        super().__init__(
+            "openrouter/google/gemma-2-9b-it:free", 0, 0, parallel_tool_call=True
+        )
+        self.note = "Gemma 2.9B model"

@@ -27,9 +27,19 @@ class ResumeReader:
     """
     def __init__(self, folder_path: str):
         self.folder_path = folder_path
-        self.pdf_data = []  # To store resume data
-        self.image_data = []  # To store resume data
-        
+        self.pdf_data = []
+        self.image_data = []
+        self.results_csv_path = os.path.join(folder_path, "Results.csv")
+
+        self.existing_files = set()
+        self.start_id = 1
+
+        if os.path.exists(self.results_csv_path):
+            old_df = pd.read_csv(self.results_csv_path)
+            if not old_df.empty:
+                self.start_id = old_df["ID"].max() + 1
+                self.existing_files = set(old_df["File"].tolist())
+
         self.process_files()
         
     def _reset_data(self):
@@ -39,21 +49,29 @@ class ResumeReader:
 
     def process_files(self):
         """Main method to process both PDF and image files."""
-        resume_id = 1
+        resume_id = self.start_id
+        found_any_resume = False
+        
         for root, _, files in os.walk(self.folder_path):
             for file in files:
                 file_path = os.path.join(root, file)
+                
+                if file_path in self.existing_files:
+                    log.print_output(f"Skipping existing file: {os.path.basename(file_path)}")
+                    continue
                 
                 # Check for PDF files
                 if file.endswith(('.pdf', '.docx')):
                     self._process_text(resume_id, file_path)
                     resume_id += 1
+                    found_any_resume = True
                     
                 if file.endswith(('.jpg', '.png')):
                     self._process_image(resume_id, file_path)
                     resume_id += 1
+                    found_any_resume = True
         
-            if resume_id == 1:
+            if not found_any_resume and self.start_id == 1:
                 log.log_and_print("No resumes found in the given folder path.")
                 break
 
@@ -70,7 +88,6 @@ class ResumeReader:
                 'ID': resume_id,
                 'File': os.path.abspath(file_path),
                 'Resume': context_reader,
-                'Category': 'Unknown', # Model prediction or manual categorization
                 'Date Processed': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'Education': None,
                 'Experience': None,
@@ -98,7 +115,6 @@ class ResumeReader:
                 'ID': resume_id,
                 'File': os.path.abspath(file_path),
                 'Resume': resume_content,
-                'Category': 'Unknown', #ctg Model prediction or manual categorization
                 'Date Processed': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 'Name': None,
                 'Education': None,
@@ -116,6 +132,15 @@ class ResumeReader:
     def get_pdf_dataframe(self):
         """Return dataframe for PDF resumes."""
         return pd.DataFrame(self.pdf_data)
+
+    def get_image_dataframe(self):
+        """Return dataframe for Image resumes."""
+        return pd.DataFrame(self.image_data)
+
+    def get_all_dataframe(self):
+        """Return all data instead"""
+        return pd.concat([self.get_pdf_dataframe(), self.get_image_dataframe()],
+                         ignore_index=True)
     
     def move_file_to_category_folder(self, category: str, file_path: str):
         """Move the file to the corresponding category folder."""
