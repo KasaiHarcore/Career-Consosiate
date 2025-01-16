@@ -1,8 +1,13 @@
 import os
 
 # Set your GROQ API key securely (avoid hardcoding in production)
+<<<<<<< HEAD
 # Use os.environ['Environment_API_KEY'] = "KEY" to setup
 # Support: OpenAI, GROQ, OpenRouter, Claude
+=======
+os.environ['OPENROUTER_API_KEY'] = "Your OpenRouter Key"
+os.environ['GROQ_API_KEY'] = "Your GROQ Key"
+>>>>>>> efa9c23ce92661862b0107b25ea4571116718922
 
 
 default_working_folder = "./data"
