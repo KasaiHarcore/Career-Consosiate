@@ -1,150 +1,167 @@
 import os
-import shutil
-from datetime import datetime
+import re
 import pandas as pd
-import pymupdf4llm as fitz
-from PIL import Image
+from pdf2image import convert_from_path
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\\Game\\github\\Tesseract-OCR'
+import textract
+from PIL import Image
 
-from app import log
+from utils import util
+# Set Tesseract path
+pytesseract.pytesseract.tesseract_cmd = r'.\utils\Tesseract-OCT\tesseract.exe'  # Path to Tesseract-OCR
 
-class ResumeReader:
+import log
+from base.models import ResumeStorage
+
+
+
+class ResumeReader():
     """
-    The ResumeReader class is designed to automate the processing and extraction of data from resume files in both PDF and image formats.
-    The class leverages various libraries such as pymupdf4llm for text extraction from PDFs and pytesseract for optical character recognition (OCR) on image files. 
-    It supports categorizing and organizing resumes into a structured format for further analysis or processing. Key features include:
-    
-    - File Processing: It scans a given folder path to identify and process resume files in PDF (.pdf, .docx) and image formats (.jpg, .png).
-    
-    - PDF and Image Handling: PDF files are converted to markdown format for easy text extraction, while image files undergo OCR to extract text content using pytesseract.
-
-    - Data Management: Extracted text from resumes is stored in two separate lists (pdf_data and image_data), which can be easily converted into Pandas DataFrames for further manipulation or analysis.
-
-    - Data Retrieval: Provides methods to retrieve structured data as Pandas DataFrames for PDFs, images, or a combined set of both. These DataFrames can be used for further data analysis, categorization, or machine learning purposes.
-
-    - File Organization: Includes a method to move files into categorized subfolders based on the extracted or predicted categories, allowing for easy organization of processed resumes.
+    The ResumeReader class processes and extracts resume data from various file formats.
+    Supports: PDF, DOCX, PNG, JPG, TIFF, BMP, GIF.
     """
-    def __init__(self, folder_path: str):
-        self.folder_path = folder_path
-        self.pdf_data = []
-        self.image_data = []
-        self.results_csv_path = os.path.join(folder_path, "Results.csv")
 
+    def __init__(self, input_path: str):
+        self.resumes_data = []
         self.existing_files = set()
-        self.start_id = 1
 
-        if os.path.exists(self.results_csv_path):
-            old_df = pd.read_csv(self.results_csv_path)
-            if not old_df.empty:
-                self.start_id = old_df["ID"].max() + 1
-                self.existing_files = set(old_df["File"].tolist())
+        # Determine input type (folder, list of files, single file)
+        if isinstance(input_path, str) and os.path.isdir(input_path):
+            self.files = self._get_files_from_folder(input_path)
+        elif isinstance(input_path, list):
+            self.files = [os.path.abspath(f) for f in input_path if os.path.isfile(f)]
+        elif isinstance(input_path, str) and os.path.isfile(input_path):
+            self.files = [os.path.abspath(input_path)]
+        else:
+            raise ValueError("Invalid input path. Must be a folder, list of file paths, or a single file path.")
 
         self.process_files()
         
-    def _reset_data(self):
-        """Reset the data lists."""
-        self.pdf_data = []
-        self.image_data = []
-
+    def _get_files_from_folder(self, folder_path):
+        """Retrieve all valid resume files from the given folder."""
+        valid_extensions = ('.pdf', '.docx', '.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')
+        files = []
+        for root, _, filenames in os.walk(folder_path):
+            for file in filenames:
+                if file.lower().endswith(valid_extensions):
+                    files.append(os.path.join(root, file))
+        if len(files) == 0:
+            log.print_error(f"No valid resume files found in the input folder: {folder_path}")
+        
+        return files
+    
     def process_files(self):
-        """Main method to process both PDF and image files."""
-        resume_id = self.start_id
-        found_any_resume = False
-        
-        for root, _, files in os.walk(self.folder_path):
-            for file in files:
-                file_path = os.path.join(root, file)
-                
-                if file_path in self.existing_files:
-                    log.print_output(f"Skipping existing file: {os.path.basename(file_path)}")
-                    continue
-                
-                # Check for PDF files
-                if file.endswith(('.pdf', '.docx')):
-                    self._process_text(resume_id, file_path)
-                    resume_id += 1
-                    found_any_resume = True
-                    
-                if file.endswith(('.jpg', '.png')):
-                    self._process_image(resume_id, file_path)
-                    resume_id += 1
-                    found_any_resume = True
-        
-            if not found_any_resume and self.start_id == 1:
-                log.log_and_print("No resumes found in the given folder path.")
-                break
+        """Process each file based on its format (PDF, DOCX, Images)."""
+        for file_path in self.files:
+            # Check for duplicate files in the database
+            if ResumeStorage.objects.filter(resume_path=file_path).exists():
+                log.print_output(f"Skipping existing file: {os.path.basename(file_path)}")
+                continue
+            
+            file_ext = os.path.splitext(file_path)[1].lower()
+            resume_content = ""
 
-    def _process_text(self, resume_id: int, file_path: str) -> None:
-        """Process the PDF file and extract content using pymupdf4llm."""
-        try:
-            context_reader = fitz.to_markdown(file_path)
-            # ctg = model.predict(resume_content)
+            if file_ext == ".pdf":
+                resume_content = self._process_pdf(file_path)
+            elif file_ext == ".docx":
+                resume_content = self._process_docx(file_path)
+            elif file_ext in [".png", ".jpg", ".jpeg", ".tiff", ".bmp", ".gif"]:
+                resume_content = self._process_image(file_path)
+            else:
+                log.print_error(f"Unsupported file format: {file_path}")
+                continue  # Skip unsupported files
+
+            # Extract personal information and encrypt email/phone
+            extracted_info, encrypt_text = self.extract_candidate_info(resume_content)
             
-            # self.move_file_to_category_folder(f'/PDF/{ctg}', file_path)
-            
-            # Append data to the PDF data list
-            self.pdf_data.append({
-                'ID': resume_id,
+
+            # Append extracted data
+            self.resumes_data.append({
                 'File': os.path.abspath(file_path),
-                'Resume': context_reader,
-                'Date Processed': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'Education': None,
-                'Experience': None,
-                'Technical Skills': None,
-                'Certificates': None,
-                'Soft Skills': None,
-                'Summary': None,
-                'Score': 0,
-                'Explanation': ''
+                'Resume': encrypt_text,
+                'Email': extracted_info['email'],
+                'Phone': extracted_info['phone'],
             })
+
+    def _process_pdf(self, file_path: str, config=''):
+        """Process PDF files by converting them to images and extracting text using OCR."""
+        try:
+            images = convert_from_path(file_path, dpi=500, poppler_path=r'.\\utils\\poppler-24.08.0\\Library\\bin')
+
+            resume_content = ''
+            for i, image in enumerate(images):
+                page_text = pytesseract.image_to_string(image, lang='eng+vie', config=config)
+                resume_content += f"\n=== Page {i + 1} ===\n{page_text}"
+
+            log.print_output(f"Successfully processed PDF: {file_path}")
+            return resume_content
+
         except Exception as e:
             log.print_error(f"Error processing PDF {file_path}: {e}")
-            
-    def _process_image(self, resume_id, file_path: str, config = '') -> None:
-        """Process the image file and extract content using pytesseract."""
+            return ""
+
+    def _process_docx(self, file_path: str):
+        """Process DOCX files by extracting plain text."""
         try:
-            # Perform OCR on the image file
-            resume_content = pytesseract.image_to_string(Image.open(file_path), lang = ["en, vn"], config = config)
-            # ctg = model.predict(resume_content)
-            
-            # self.move_file_to_category_folder(f'/Image/{ctg}', file_path)
-            
-            # Append data to the image data list
-            self.image_data.append({
-                'ID': resume_id,
-                'File': os.path.abspath(file_path),
-                'Resume': resume_content,
-                'Date Processed': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                'Name': None,
-                'Education': None,
-                'Experience': None,
-                'Technical Skills': None,
-                'Certificates': None,
-                'Soft Skills': None,
-                'Summary': None,
-                'Score': 0,
-                'Explanation': ''
-            })
+            doc = textract.process(file_path)
+            resume_content = doc.decode('utf-8')
+
+            log.print_output(f"Successfully processed DOCX: {file_path}")
+            return resume_content
+
         except Exception as e:
-            log.print_error(f"Error processing image {file_path}: {e}")
-    
-    def get_pdf_dataframe(self):
-        """Return dataframe for PDF resumes."""
-        return pd.DataFrame(self.pdf_data)
+            log.print_error(f"Error processing DOCX {file_path}: {e}")
+            return ""
 
-    def get_image_dataframe(self):
-        """Return dataframe for Image resumes."""
-        return pd.DataFrame(self.image_data)
+    def _process_image(self, file_path: str, config=''):
+        """Process image files (JPG, PNG, TIFF, etc.) by extracting text using OCR."""
+        try:
+            image = Image.open(file_path)
+            resume_content = pytesseract.image_to_string(image, lang='eng+vie', config=config)
 
-    def get_all_dataframe(self):
-        """Return all data instead"""
-        return pd.concat([self.get_pdf_dataframe(), self.get_image_dataframe()],
-                         ignore_index=True)
+            log.print_output(f"Successfully processed Image: {file_path}")
+            return resume_content
+
+        except Exception as e:
+            log.print_error(f"Error processing Image {file_path}: {e}")
+            return ""
+
+    def extract_candidate_info(self, resume_text: str):
+        """
+        Extracts candidate's name, email, and phone number.
+        - Keeps the name unchanged.
+        - Encrypts email & phone using AES.
+        - Replaces original email/phone with their encrypted versions in the resume text.
     
-    def move_file_to_category_folder(self, category: str, file_path: str):
-        """Move the file to the corresponding category folder."""
-        base_folder = os.path.dirname(file_path)
-        new_folder = os.path.join(base_folder, category)
-        os.makedirs(new_folder, exist_ok = True)
-        shutil.move(file_path, os.path.join(new_folder, os.path.basename(file_path)))
+        Args:
+            resume_text (str): Extracted text from a resume.
+    
+        Returns:
+            tuple: Dictionary containing 'email', 'phone' and updated 'resume_text'.
+        """
+    
+        # Regular Expression Patterns
+        email_pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+        vietnamese_phone_pattern = r"\b0[1-9]{1}[0-9]{8}\b"  # Ensures 10-digit format
+    
+        # Extract Email & Phone
+        email_match = re.search(email_pattern, resume_text)
+        phone_match = re.search(vietnamese_phone_pattern, resume_text)
+    
+        email_encrypted = util.encrypt_CV(email_match.group()) if email_match else ""
+        phone_encrypted = util.encrypt_CV(phone_match.group()) if phone_match else ""
+    
+        # Replace original email & phone in the resume text with encrypted versions
+        if email_match:
+            resume_text = resume_text.replace(email_match.group(), email_encrypted)
+        if phone_match:
+            resume_text = resume_text.replace(phone_match.group(), phone_encrypted)
+    
+        # Return email and phone and updated resume text
+        return {"email": email_match.group() if email_match else "No email found",
+                "phone": phone_match.group() if phone_match else "No phone number found"}, resume_text
+
+
+    def get_dataframe(self):
+        """Return a pandas DataFrame containing all extracted resume data."""
+        return pd.DataFrame(self.resumes_data)
