@@ -1,43 +1,94 @@
 import os
-from app.model import common
-from app import log, globals
-from app.utils import util
+import datetime
+import pandas as pd
+import log
+import globals
 
-def parse_resumes(folder_path, data, job_des, custom_prompt = ""):
-    for i in range(len(data)):
-        file_path = data['File'][i]
-        file_name = os.path.basename(file_path)
+from utils import util, parse
+from model import common
+from model.register import register_all_models
+from base.models import ResumeStorage
 
-        resume = data["Resume"][i]
-        log.print_with_time(f"Processing resume {i}...")
+# Register AI models
+register_all_models()
+common.set_model('openrouter/meta-llama/llama-3.1-70b-instruct:free')  # AI model
+
+def parse_resumes(data: pd.DataFrame, job_description: str, custom_prompt: str) -> bool:
+    """
+    Parses and processes resumes by calling an AI model for scoring and extracting details.
+
+    Args:
+        data (pd.DataFrame): DataFrame containing resume file paths and extracted text.
+        job_description (str): The job description to compare against resumes.
+        custom_prompt (str): Custom prompt to refine the AI model's response.
+
+    Returns:
+        bool: Returns True when processing is completed.
+    """
+    # Validate DataFrame
+    if data.empty:
+        log.print_error("Error: No resume data found to process.")
+        return False
+
+    log.print_with_time(f"Processing {len(data)} resumes...")
+
+    # Iterate over DataFrame rows using .iterrows()
+    for index, row in data.iterrows():
         try:
-            # Call the model
-            response_content, cost, input_tokens, output_tokens = common.SELECTED_MODEL.call(
-                response_format = "text",
-                messages = [
-                    {
-                    "role": "user",
-                    "content": globals.scoring_system_prompt + "\nUSER:" + custom_prompt + "\nCONTENT: \nHere is the resume:\n" + resume + "\n" + "\n\nHere is the job description:\n" + job_des
-                    }
-                ]
+            # Extract resume file path and text from DataFrame row
+            file_path = row['File']
+            file_name = os.path.basename(file_path)
+            resume_text = row['Resume']
+
+            log.print_with_time(f"Processing resume {index + 1}/{len(data)}: {file_name}")
+
+            # Construct prompt for AI model
+            model_prompt = (
+                globals.scoring_system_prompt +
+                "\nUSER: " + custom_prompt +
+                globals.return_format_prompt +
+                "\nCONTENT: \nHere is the resume:\n" + resume_text +
+                "\n\nHere is the job description:\n" + job_description
             )
 
-            log.print_llm(f"Cost: {cost}, Input tokens: {input_tokens}, Output tokens: {output_tokens}")
-            log.print_llm(f"Response: {response_content}")
-            # Parse the response
-            response = util.data_filter(response_content)
-            data["Education"][i] = response["Education"]
-            data["Experience"][i] = response["Experience"]
-            data["Technical Skills"][i] = response["Technical Skills"]
-            data["Certificates"][i] = response["Certificates"]
-            data["Soft Skills"][i] = response["Soft Skills"]
-            data["Summary"][i] = response["Summary Comment"]
-            data["Score"][i] = response["Score"]
-            data["Explanation"][i] = response["Explanation"]
+            # Call AI model for processing
+            response_content, cost, input_tokens, output_tokens = common.SELECTED_MODEL.call(
+                response_format="text",
+                messages=[{"role": "user", "content": model_prompt}]
+            )
+
+            # Log AI model details
+            log.print_llm(f"Cost: {cost}, Input Tokens: {input_tokens}, Output Tokens: {output_tokens}")
+            log.print_llm(f"Model Response: {response_content}")
+
+            # Parse model response safely
+            response_data = util.data_filter(response_content)
+
+            # Store resume details in the database
+            ResumeStorage.objects.create(
+                resume_name="Manually added",
+                resume_email=row['Email'],
+                resume_phone=row['Phone'],
+                resume_path=file_path,
+                resume_text=resume_text,
+                resume_date_added=datetime.datetime.now(),
+                resume_education=response_data.get("Education", ""),
+                resume_experience=response_data.get("Experience", 0.0),
+                resume_tech_skills=response_data.get("Technical Skills", ""),
+                resume_soft_skills=response_data.get("Soft Skills", ""),
+                resume_certificates=response_data.get("Certificates", ""),
+                resume_summary=response_data.get("Summary Comment", ""),
+                resume_score=response_data.get("Score", 0.0),
+                resume_AI_explanation=response_data.get("Explanation", "")
+            )
+
+        except KeyError as ke:
+            log.print_error(f"KeyError in response parsing for resume {index + 1}: Missing key {ke}")
+            globals.failed.append(file_name)
 
         except Exception as e:
-            log.print_error(f"Error processing resume {i}: {e}")
+            log.print_error(f"Unexpected error while processing resume {index + 1}: {e}")
             globals.failed.append(file_name)
-            continue
- 
+
+    log.print_with_time("Resume processing completed.")
     return True
