@@ -11,9 +11,9 @@ from litellm.utils import Choices, Message, ModelResponse
 from openai import BadRequestError
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from app.log import log_and_print
-from app.model import common
-from app.model.common import Model
+from log import log_and_print
+from model import common
+from model.common import Model
 
 
 class OPModel(Model):
@@ -158,3 +158,17 @@ class Gemma2_9B(OPModel):
             "openrouter/google/gemma-2-9b-it:free", 0, 0, parallel_tool_call=True
         )
         self.note = "Gemma 2.9B model"
+        
+class DeepSeek_R1(OPModel):
+    def __init__(self):
+        super().__init__(
+            "openrouter/deepseek/deepseek-r1:free", 0, 0, parallel_tool_call=True
+        )
+        self.note = "DeepSeek R1 model"
+        
+class OpenAI_O3_Mini(OPModel):
+    def __init__(self):
+        super().__init__(
+            "openrouter/openai/o3-mini", 0.0000011, 0.0000044, parallel_tool_call=True
+        )
+        self.note = "OpenAI O3 Mini model"

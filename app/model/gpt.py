@@ -23,9 +23,9 @@ from openai.types.chat.chat_completion_tool_choice_option_param import (
 from openai.types.chat.completion_create_params import ResponseFormat
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from app.log import log_and_print
-from app.model import common
-from app.model.common import Model
+from log import log_and_print
+from model import common
+from model.common import Model
 
 class FunctionCallIntent:
     """An intent to call a tool function.

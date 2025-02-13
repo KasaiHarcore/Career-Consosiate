@@ -11,9 +11,9 @@ from litellm.utils import Choices, Message, ModelResponse
 from openai import BadRequestError
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 
-from app.log import log_and_print
-from app.model import common
-from app.model.common import Model
+from log import log_and_print
+from model import common
+from model.common import Model
 
 
 class AnthropicModel(Model):

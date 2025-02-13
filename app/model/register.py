@@ -1,5 +1,4 @@
-from app.model import claude, common, gpt, groq, openrouter
-
+from model import claude, common, gpt, groq, openrouter
 
 def register_all_models() -> None:
     """
@@ -14,7 +13,7 @@ def register_all_models() -> None:
     common.register_model(gpt.Gpt35_Turbo16k_0613())
     common.register_model(gpt.Gpt35_Turbo0613())
     common.register_model(gpt.Gpt4_0613())
-    # common.register_model(gpt.Gpt4_O())
+    common.register_model(gpt.Gpt4_O())
 
     common.register_model(claude.Claude3Opus())
     common.register_model(claude.Claude3Sonnet())
@@ -35,6 +34,8 @@ def register_all_models() -> None:
     common.register_model(openrouter.Llama31_70B_Instruct())
     common.register_model(openrouter.Qwen2_7B_Instruct())
     common.register_model(openrouter.Gemma2_9B())
+    common.register_model(openrouter.DeepSeek_R1())
+    common.register_model(openrouter.OpenAI_O3_Mini())
 
     # register default model as selected
     common.SELECTED_MODEL = gpt.Gpt35_Turbo0125()

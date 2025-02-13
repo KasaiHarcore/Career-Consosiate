@@ -2,7 +2,7 @@ import sys
 import threading
 from abc import ABC, abstractmethod
 
-from app.log import log_and_cprint
+from log import log_and_cprint
 
 # Variables for each process. Since models are singleton objects, their references are copied
 # to each process, but they all point to the same objects. For safe updating costs per process,
