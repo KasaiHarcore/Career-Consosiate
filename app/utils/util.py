@@ -1,5 +1,11 @@
 import re
 import json
+import globals
+
+import log
+# Securely store and retrieve the secret key
+from Crypto.Cipher import AES
+import base64
 
 def data_filter(output: str) -> dict:
     """
@@ -22,21 +28,24 @@ def data_filter(output: str) -> dict:
         json_data = json.loads(output.strip())
 
         # Extract sections with default empty structures if not present
-        job_title = json_data.get("job_category", "")
+        name = json_data.get("name", "")
         education = json_data.get("education_degree", [])
-        experience = json_data.get("experience", 0)
-        hskills = json_data.get("hard_skill", [])
+        experience = json_data.get("experience", 0.0)
+        tskills = json_data.get("technicial_skill", [])
         certificates = json_data.get("certificates", [])
         sskill = json_data.get("soft_skill", [])
         summary = json_data.get("summary_cv", "")
         score = json_data.get("fit_score", 0.0)
         explanation = json_data.get("explanation", "")
+        
+        if len(summary) == 0:
+            return False
 
         result = {
-            'Category': job_title,
+            'Name': name,
             'Education': education,
             'Experience': experience,
-            'Technical Skills': hskills,
+            'Technical Skills': tskills,
             'Certificates': certificates,
             'Soft Skills': sskill,
             'Summary Comment': summary,
@@ -49,9 +58,9 @@ def data_filter(output: str) -> dict:
         # Handle JSON decoding errors
         print(f"Error decoding JSON: {e}")
         return {
-            'Category': "",
+            'Name': "",
             'Education': [],
-            'Experience': 0,
+            'Experience': 0.0,
             'Technical Skills': [],
             'Certificates': [],
             'Soft Skills': [],
@@ -59,3 +68,32 @@ def data_filter(output: str) -> dict:
             'Score': 0.0,
             'Explanation': "",
         }
+        
+def encrypt_CV(data):
+    """Encrypts data using AES encryption (EAX mode) and includes nonce."""
+    try:
+        cipher = AES.new(globals.SECURITY_KEY, AES.MODE_EAX)
+        nonce = cipher.nonce  # Generate unique nonce
+        ciphertext, tag = cipher.encrypt_and_digest(data.encode('utf-8'))
+        return base64.b64encode(nonce + ciphertext).decode('utf-8')
+    except Exception as e:
+        log.print_error(f"Encryption error: {e}")
+        return ""
+
+# Use if needed else skip this
+def decrypt_CV(encrypted_data):
+    """Decrypts AES-encrypted email or phone numbers securely."""
+    try:
+        encrypted_data = base64.b64decode(encrypted_data)
+        if len(encrypted_data) < 16:
+            raise ValueError("Invalid encrypted data: Missing nonce.")
+
+        nonce = encrypted_data[:16]  # Extract nonce
+        ciphertext = encrypted_data[16:]  # Extract ciphertext
+        cipher = AES.new(globals.SECURITY_KEY, AES.MODE_EAX, nonce=nonce)
+
+        return cipher.decrypt(ciphertext).decode('utf-8')
+
+    except Exception as e:
+        log.print_error(f"Decryption error: {e}")
+        return ""  # Return empty string if decryption fails
