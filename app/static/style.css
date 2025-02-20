@@ -1,0 +1,624 @@
+/* ==========================
+   1) KEYFRAMES ANIMATION
+   ========================== */
+@keyframes fadeBody {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+@keyframes fadeUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeInDash {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes fadeContent {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes iconBounce {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ==========================
+   2) RESET & BASE
+   ========================== */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body{
+    font-family: 'Poppins', sans-serif;
+    /* Gradient nền toàn trang + shape ẩn */
+    background: linear-gradient(160deg, #f4f6f9 30%, #eaf3ff 100%);
+    overflow-x: hidden;
+    overflow-y: hidden;
+    min-height: 100vh;
+    position: relative;
+    /* Animation fade body (mặc định) */
+    animation: fadeBody 0.5s ease-in-out;
+}
+.decor-shape {
+    position: absolute;
+    top: -150px;
+    right: -100px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle at center, rgba(0,123,255,0.2) 0%, transparent 80%);
+    filter: blur(40px);
+    z-index: 0;
+    pointer-events: none; 
+}
+
+/* ==========================
+   3) NAVBAR
+   ========================== */
+.navbar-custom {
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 999;
+    transition: all 0.3s ease;
+}
+.navbar-custom .logo {
+    font-size: 24px;
+    font-weight: 600;
+    color: #007bff;
+    text-decoration: none;
+}
+.navbar-custom .sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: #333;
+}
+.navbar-custom .sidebar-toggle-btn:hover {
+    color: #007bff;
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+@media (max-width: 992px) {
+    .navbar-custom .sidebar-toggle-btn {
+        display: block;
+    }
+}
+
+/* ==========================
+   4) SIDEBAR
+   ========================== */
+.sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+    z-index: 998;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%),
+                linear-gradient(135deg, #006eff 0%, #37ccfa 100%);
+    background-blend-mode: overlay;
+    backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+    border-radius: 0 8px 8px 0; /* bo nhẹ góc phải sidebar */
+}
+.sidebar.collapsed {
+    transform: translateX(-110%);
+}
+.sidebar .nav-link {
+    font-size: 16px;
+    padding: 12px 15px;
+    border-radius: 6px;
+    transition: background-color 0.3s, transform 0.2s;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.sidebar .nav-link i {
+    margin-right: 10px;
+    font-size: 18px;
+}
+.sidebar .nav-link:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.03);
+}
+.sidebar .nav-link.active {
+    background: rgba(255,255,255,0.4);
+}
+
+/* ==========================
+   5) CONTENT (cốt lõi)
+   ========================== */
+/* Gộp từ nhiều nơi: .content có margin-left, padding, min-height, position, transition... */
+.content {
+    margin-left: 250px;
+    padding: 40px;
+    position: relative;
+    min-height: 100vh;
+
+    /* Giữ lại transition chung và animation fadeBody 0.4s */
+    transition: all 0.3s ease;
+    animation: fadeBody 0.4s ease-in-out;
+}
+
+/* .main-content (nếu có file main.html xài) có thể vẫn giống .content, 
+   tuỳ cách tổ chức dự án */
+
+.main-content {
+    transition: margin-left 0.3s ease;
+    padding: 40px 50px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
+    animation: fadeContent 0.6s ease-in-out;
+}
+
+
+/* ==========================
+   6) TABLE / TABLE-CONTAINER
+   ========================== */
+.table-container {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+    width: calc(94vw - 210px);
+    position: relative;
+    animation: fadeUp 0.5s ease-in-out;
+    margin: 0 auto;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+.table tbody tr:hover {
+    background-color: #f1f3f5;
+    transition: background-color 0.2s ease;
+}
+
+/* ==========================
+   7) ACTION ICONS / BUTTONS
+   ========================== */
+.action-icons i {
+    display: inline-block !important;
+    visibility: visible !important;
+}
+.action-icons i:hover {
+    transform: scale(1.1);
+    transition: 0.2s;
+}
+
+/* Nút btn-primary kèm hiệu ứng ripple */
+.btn-primary {
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    transition: transform 0.2s ease, background-color 0.2s;
+    position: relative;
+    overflow: hidden; /* để ripple không tràn */
+}
+.btn-primary:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+.btn-primary:active::after {
+    content: "";
+    position: absolute;
+    width: 100px; 
+    height: 100px;
+    background: rgba(255,255,255,0.4);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    top: var(--y);
+    left: var(--x);
+    pointer-events: none;
+}
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ==========================
+   8) UPLOAD AREA
+   ========================== */
+.upload-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.upload-area:hover {
+    background-color: #f0f0f0;
+}
+
+/* ==========================
+   9) MODAL / OVERLAY INFO
+   ========================== */
+.info-modal {
+    position: fixed;
+    top: 50%; 
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    z-index: 1000;
+    min-width: 300px;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+.info-modal.show {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+.info-modal.hide {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+}
+.overlay {
+    position: fixed;
+    top: 0; 
+    left: 0;
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.overlay.show {
+    display: block;
+    opacity: 1;
+}
+.overlay.hide {
+    opacity: 0;
+}
+
+/* ==========================
+   10) PAGINATION / ROWS PER PAGE
+   ========================== */
+.pagination-container {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+}
+.pagination {
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+}
+.pagination button {
+    background: none;
+    border: none;
+    padding: 5px 8px;
+    margin: 0 3px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #007bff;
+}
+.pagination button:hover {
+    background-color: rgba(0,123,255,0.1);
+}
+.pagination button:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+.row-control {
+    display: flex;
+    align-items: center;
+}
+.row-control label {
+    margin-right: 5px;
+}
+.row-control select {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 14px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* ==========================
+   11) SEARCH BAR
+   ========================== */
+.search-bar {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.search-bar i {
+    margin-right: 8px;
+    color: #aaa;
+}
+.search-bar input[type="text"] {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 6px 12px;
+    width: 250px;
+}
+
+/* ==========================
+   12) MINI STATS / CARD / ETC.
+   ========================== */
+/* Ví dụ cho dashboard, job listings… */
+.mini-stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 20px;
+    animation: fadeUp 0.5s ease-in-out;
+}
+.stat-card, .stats-card {
+    flex: 1;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: transform 0.3s;
+}
+.stat-card:hover, .stats-card:hover {
+    transform: translateY(-3px);
+}
+.stat-title, .stats-title {
+    font-size: 14px;
+    color: #666;
+}
+.stat-value, .stats-value {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 5px;
+    color: #333;
+}
+
+/* Card chung (dashboard) */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    z-index: 1;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+}
+
+/* ==========================
+   13) PILL STATUS / TAGS
+   ========================== */
+.pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: #fff;
+    font-weight: 500;
+}
+.pill-Passed {
+    background: #198754; /* green */
+}
+.pill-Pending {
+    background: #eeea16; /* yellow */
+}
+.pill-Rejected {
+    background: #d81111; /* red */
+}
+/* Hoặc job status */
+.pill-open {
+    background: #198754; /* xanh */
+}
+.pill-closed {
+    background: #e71c1c; /* đỏ */
+}
+
+/* ==========================
+   14) TABBED CONTENT, v.v…
+   ========================== */
+.nav-tabs .nav-link.active {
+    background-color: #fff;
+    border-bottom: 2px solid #007bff;
+    color: #007bff !important;
+    font-weight: 600;
+}
+.nav-tabs .nav-link {
+    color: #555;
+    font-weight: 500;
+}
+.activity-list li {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+.activity-list a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+}
+.activity-list a:hover {
+    text-decoration: underline;
+}
+.activity-list .badge {
+    background: #e2e3e5;
+    color: #333;
+    margin: 0 5px;
+    font-weight: 500;
+}
+.activity-list .text-muted {
+    font-size: 0.85rem;
+}
+
+/* ==========================
+   15) FOOTER WATERMARK
+   ========================== */
+.footer-watermark {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 12px;
+    color: gray;
+    text-align: center;
+    background: rgba(255,255,255,0.8);
+    z-index: 2;
+    padding: 6px 0;
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+    backdrop-filter: blur(4px);
+}
+.footer-watermark p {
+    margin: 4px 0;
+}
+
+/* ==========================
+   16) TOAST (nếu cần)
+   ========================== */
+#toastMessage {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 200px;
+    background: #28a745;
+    color: #fff;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.4s ease;
+    z-index: 2000;
+}
+#toastMessage.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ==========================
+   17) RESPONSIVE OVERRIDE
+   ========================== */
+@media (max-width: 992px) {
+    .content {
+        margin-left: 0;
+        padding: 20px;
+    }
+    .table-container {
+        width: 100% !important;
+        margin: 0 auto;
+    }
+    /* Ẩn sidebar, v.v… tuỳ bạn */
+}
+
+/* ==========================
+   18) Need to specify
+   ========================== */
+.tooltip-inner {
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 8px;
+    font-size: 13px;
+}
+.tooltip-arrow {
+    color: #333;
+}
+
+.confirm-delete-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    padding: 20px;
+    width: 320px;
+    max-width: 90%;
+    z-index: 1500;
+    display: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+.confirm-delete-modal.show {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+.confirm-delete-modal .modal-body {
+    margin-bottom: 20px;
+    text-align: center;
+}
+.icon-bounce:hover {
+    animation: iconBounce 0.4s;
+}
+@keyframes iconBounce {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100%{ transform: scale(1); }
+}
+
+.modal.fade .modal-dialog {
+    transform: translateY(-50px);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+    opacity: 0;
+}
+.modal.fade.show .modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
+}
