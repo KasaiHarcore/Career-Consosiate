@@ -9,7 +9,7 @@ class JobStorage(models.Model):
     
     job_id = models.BigAutoField(primary_key = True)
     job_position = models.CharField(max_length = 100)
-    job_description = models.TextField() 
+    job_description = models.CharField(max_length = 100)
     job_education = models.CharField(max_length = 300)
     
     EXPERIENCE_LEVELS = [
@@ -36,8 +36,8 @@ class JobStorage(models.Model):
     ]
     
     job_status = models.CharField(max_length = 10, choices = STATES, default = 'Open')
-    job_start = models.DateTimeField()
-    job_end = models.DateTimeField()
+    job_start = models.DateField()
+    job_end = models.DateField()
 
     def __str__(self):
         return f"{self.job_position}, ({self.job_experience}), ({self.job_start}), ({self.job_end})"
@@ -50,14 +50,14 @@ class ResumeStorage(models.Model):
     resume_name = models.CharField(max_length = 100, blank = False, null = True)
     resume_email = models.EmailField(blank = False, null = True)
     resume_phone = models.CharField(max_length = 15, blank = True, null = True)
-    resume_path = models.CharField(max_length = 255, blank = False, null = False)
-    resume_text = models.TextField()
-    resume_date_added = models.DateTimeField(default=timezone.now, blank=False, null=False)
-    resume_education = models.CharField(max_length = 100, blank = True, null = True)
+    resume_path = models.CharField(max_length = 255, blank = True, null = False)
+    resume_text = models.TextField(blank = True, null = False)
+    resume_date_added = models.DateField(default=timezone.now, blank=False, null=False)
+    resume_education = models.CharField(max_length = 100, blank = True, null = True, default = 'No Info')
     resume_experience = models.FloatField(default = 0.0)
-    resume_tech_skills = models.CharField(max_length = 255, blank = True, null = True)
-    resume_soft_skills = models.CharField(max_length = 255, blank = True, null = True)
-    resume_certificates = models.CharField(max_length = 255, blank = True, null = True)
+    resume_tech_skills = models.CharField(max_length = 255, blank = True, null = True, default = 'No Info')
+    resume_soft_skills = models.CharField(max_length = 255, blank = True, null = True, default = 'No Info')
+    resume_certificates = models.CharField(max_length = 255, blank = True, null = True, default = 'No Info')
     
     STATES = [
         ('Passed', 'Passed'),
@@ -66,10 +66,10 @@ class ResumeStorage(models.Model):
     ]
     
     resume_status = models.CharField(max_length = 10, choices = STATES, default = 'Pending')
-    resume_summary = models.TextField()
-    resume_score = models.FloatField(default = 0.0)
-    resume_AI_explanation = models.TextField(blank = True, null = True)
+    resume_summary = models.TextField(blank = True, null = True, default = 'No Info')
+    resume_score = models.FloatField(default = 0.0, blank = True, null = True)
+    resume_AI_explanation = models.TextField(blank = True, null = True, default = 'No Info')
     resume_job_id = models.ForeignKey(JobStorage, on_delete = models.CASCADE, blank = True, null = True)
-
+    
     def __str__(self):
         return f"{self.resume_path}, ({self.resume_date_added}), ({self.resume_score})"
