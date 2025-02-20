@@ -4,7 +4,7 @@ import os
 # Use os.environ['Environment_API_KEY'] = "KEY" to setup
 # Support: OpenAI, GROQ, OpenRouter, Claude
 os.environ['OPENAI_API_KEY'] = ""
-os.environ['OPENROUTER_API_KEY'] = "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"
+os.environ['OPENROUTER_API_KEY'] = ""
 os.environ['GROQ_API_KEY'] = ""
 
 # Secret Key for Encrypt / Decrypt personal information
