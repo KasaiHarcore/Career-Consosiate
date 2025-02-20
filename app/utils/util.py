@@ -3,7 +3,7 @@ import json
 import globals
 
 import log
-# Securely store and retrieve the secret key
+
 from Crypto.Cipher import AES
 import base64
 
@@ -28,7 +28,6 @@ def data_filter(output: str) -> dict:
         json_data = json.loads(output.strip())
 
         # Extract sections with default empty structures if not present
-        name = json_data.get("name", "")
         education = json_data.get("education_degree", [])
         experience = json_data.get("experience", 0.0)
         tskills = json_data.get("technicial_skill", [])
@@ -42,7 +41,6 @@ def data_filter(output: str) -> dict:
             return False
 
         result = {
-            'Name': name,
             'Education': education,
             'Experience': experience,
             'Technical Skills': tskills,
@@ -55,19 +53,7 @@ def data_filter(output: str) -> dict:
         return result
 
     except json.JSONDecodeError as e:
-        # Handle JSON decoding errors
-        print(f"Error decoding JSON: {e}")
-        return {
-            'Name': "",
-            'Education': [],
-            'Experience': 0.0,
-            'Technical Skills': [],
-            'Certificates': [],
-            'Soft Skills': [],
-            'Summary Comment': "",
-            'Score': 0.0,
-            'Explanation': "",
-        }
+        return None
         
 def encrypt_CV(data):
     """Encrypts data using AES encryption (EAX mode) and includes nonce."""
@@ -97,3 +83,20 @@ def decrypt_CV(encrypted_data):
     except Exception as e:
         log.print_error(f"Decryption error: {e}")
         return ""  # Return empty string if decryption fails
+
+def parse_list_to_string(data: list) -> str:
+    """
+    Converts a list of strings to a single string.
+    """
+    if isinstance(data, list):
+        return ', '.join(data)
+    return str(data)
+
+def parse_float_safe(value, default: float = 0.0):
+    """
+    Safely parses a float value from a string.
+    """
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
