@@ -1,18 +1,34 @@
 # Career-Consosiate
+### AI-Powered Resume Screening for Human Resources
 
-AI Application for Human Resource
+Career-Consosiate is web-like AI-driven application designed to assist human resource professionals in screening resumes efficiently.
 
-# How to install and run:
-1. Please install Tesseract for OCR task and poppler:
-- https://github.com/oschwartz10612/poppler-windows
-- https://github.com/tesseract-ocr/tesseract
-And put installed destination at: ./app/utils
-2. Install requirements.txt
-3. Go to app folder and type:
-`python manage.py makemigrations`
-This will initialize the database, then
-`python manage.py migrate`
-4. Finally run the server and run local link:
-`python manage.py runserver`
+# Installation & Setup
+Follow the steps below to install and run the application:
+### 1. Prerequisites
+- **Tesseract** OCR (for optical character recognition"
+  - Download: [Tesseract](https://github.com/tesseract-ocr/tesseract)
+- **Poppler** (for processing PDF files
+  - Download: [Poppler for Windoes](https://github.com/oschwartz10612/poppler-windows)
 
-# How to use
+After installation, place the installed files in the `./app/utils` directory.
+
+### 2. Install Required Dependencies
+Run the following command to install all necessary Python packages:
+```
+pip install -r requirements.txt
+```
+
+### 3. Database Setup
+Navigate to the `app` folder and initialize the database:
+```
+python manage.py makemigrations
+python manage.py migrate
+```
+
+4. Run the Application
+Start the development server using:
+```
+python manage.py runserver
+```
+The application will be available at http://127.0.0.1:8000/
