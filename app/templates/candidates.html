@@ -16,266 +16,30 @@
 
     <!-- Đã có Bootstrap, FontAwesome, Animate.css trong main.html, 
          nên không cần load lại (nếu main.html lo việc này) -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 
     <style>
-        /* ------------------------------
-           ANIMATION
-        ------------------------------ */
-        @keyframes fadeBody {
-            from { opacity: 0; }
-            to   { opacity: 1; }
+        .main-content {
+            transition: margin-left 0.3s ease;
+            min-height: 100vh;
+            position: relative;
+            z-index: 2;
+            animation: fadeContent 0.6s ease-in-out;
+            margin-left: 0px;
+            padding: 0px
         }
-        @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ------------------------------
-           CONTENT
-        ------------------------------ */
-        .content {
-            margin-left: 250px;
-            padding: 40px;
-            transition: all 0.3s ease;
-            /* Hoặc dùng animation fadeBody nếu muốn */
-            animation: fadeBody 0.4s ease-in-out;
-        }
-
-        /* ------------------------------
-           TABLE CONTAINER
-        ------------------------------ */
+    
         .table-container {
             background: #f8f9fa;
-            padding: 25px;
             border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.05);
-            width: calc(94vw - 210px);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
             position: relative;
             animation: fadeUp 0.5s ease-in-out;
-        }
-
-        /* Table responsive (overflow-x auto) */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        /* TABLE ROWS hover hiệu ứng */
-        .table tbody tr:hover {
-            background-color: #f1f3f5;
-            transition: background-color 0.2s ease;
-        }
-
-        /* ACTION ICONS hover scale */
-        .action-icons i:hover {
-            transform: scale(1.1);
-            transition: 0.2s;
-        }
-
-        .action-icons i {
-            display: inline-block !important;
-            visibility: visible !important;
-        }
-
-        /* ------------------------------
-           UPLOAD AREA
-        ------------------------------ */
-        .upload-area {
-            border: 2px dashed #ccc;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .upload-area:hover {
-            background-color: #f0f0f0;
-        }
-
-        /* ------------------------------
-           MODAL INFO
-        ------------------------------ */
-        .info-modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 1000;
-            min-width: 300px;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        .info-modal.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .info-modal ul {
-            list-style-type: none;
-            padding-left: 20px;
-        }
-        /* Animation when closing */
-        .info-modal.hide {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.9);
-        }
-
-        /* ------------------------------
-           OVERLAY MỜ
-        ------------------------------ */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Show the overlay with fade-in effect */
-        .overlay.show {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Hide overlay smoothly when closing */
-        .overlay.hide {
-            opacity: 0;
-        }
-
-        /* ------------------------------
-           PHÂN TRANG 
-        ------------------------------ */
-        .pagination-container {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #555;
-        }
-        .pagination {
-            display: flex;
-            align-items: center;
-            margin-left: 15px;
-        }
-        .pagination button {
-            background: none;
-            border: none;
-            padding: 5px 8px;
-            margin: 0 3px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #007bff;
-        }
-        .pagination button:hover {
-            background-color: rgba(0, 123, 255, 0.1);
-        }
-        .pagination button:disabled {
-            color: #ccc;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: #007bff;
-            border: none;
-            border-radius: 6px;
-            transition: transform 0.2s ease, background-color 0.2s;
-            position: relative;
-            overflow: hidden; /* Để ripple không tràn */
-        }
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: scale(1.05);
-        }
-
-        /* Ripple effect (demo) */
-        .btn-primary:active::after {
-            content: "";
-            position: absolute;
-            width: 100px; 
-            height: 100px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            top: var(--y);
-            left: var(--x);
-            pointer-events: none;
-        }
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        /* ------------------------------
-           RESPONSIVE MEDIA QUERIES
-        ------------------------------ */
-        @media (max-width: 992px) {
-          .content {
-              margin-left: 0;
-              padding: 20px;
-          }
-          .table-container {
-              width: 100% !important;
-              margin: 0 auto;
-          }
-        }
-
-        /* ------------------------------
-           SEARCH BAR
-        ------------------------------ */
-        .search-bar {
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .search-bar i {
-            margin-right: 8px;
-            color: #aaa;
-        }
-        .search-bar input[type="text"] {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            padding: 6px 12px;
-            width: 250px;
-        }
-
-        /* ------------------------------
-              PILL STATUS
-        ------------------------------ */
-        .pill {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          color: #fff;
-          font-weight: 500;
-        }
-        .pill-Passed {
-          background: #198754; /* green */
-        }
-        .pill-Pending {
-          background: #eeea16; /* yellow */
-        }
-        .pill-Rejected {
-          background: #d81111; /* red */
+            margin: 0px
         }
     </style>
+
 </head>
 
 <body>
@@ -285,20 +49,26 @@
           <h3 class="mb-4" style="animation: fadeUp 0.5s ease-in-out;">Candidates</h3>
 
           <div class="table-container">
-              <div class="upload-area">
-                  <i class="fas fa-file-upload fa-2x mb-2"></i>
-                  <p class="mb-2">Drag your files here or click in this area. <br> PDF and DOCX formats are available.</p>
-                  <button class="btn btn-primary btn-sm">Upload</button>
-                  <button class="btn btn-secondary btn-sm">Clear</button>
+            <div class="upload-area" id="uploadArea">
+                <i class="fas fa-file-upload fa-2x mb-2"></i>
+                <p class="mb-2">
+                  Drag your files here or click in this area.<br>
+                  PDF, DOCX, and Images are supported.
+                </p>
+                <button class="btn btn-primary btn-sm" id="uploadBtn">Upload</button>
               </div>
           </div>
-      </div>
-    </div>
+
+    <!-- Form ẩn để upload file/folder -->
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" style="display: none;">
+    {% csrf_token %}
+    <input id="uploadInput" type="file" name="resume_files" multiple webkitdirectory/>
+    </form>
 
     <!-- 2) Danh sách Candidates -->
     <div class="d-flex">
-      <div class="content">
-        <h3 class="mb-4" style="animation: fadeUp 0.5s ease-in-out;">List of Uploaded Candidates</h3>
+      <div class="main-content">
+        <h3 class="mb-4" style="animation: fadeUp 0.5s ease-in-out; padding-top: 20px;">List of Uploaded Candidates</h3>
             <div class="table-container table-responsive">
               <div class="mb-3 d-flex justify-content-between align-items-center">
                   <form method="GET" action="{% url 'candidates' %}" class = "search-bar">
@@ -325,22 +95,21 @@
                     data-name="{{ resume.resume_name }}"
                     data-email="{{ resume.resume_email }}"
                     data-phone="{{ resume.resume_phone }}"
-                    data-path="{{ resume.resume_path }}"
-                    data-text="{{ resume.resume_text }}"
-                    data-date-added="{{ resume.resume_date_added }}"
-                    data-education="{{ resume.resume_education }}"
-                    data-experience="{{ resume.resume_experience }}"
-                    data-tech-skills="{{ resume.resume_tech_skills }}"
-                    data-soft-skills="{{ resume.resume_soft_skills }}"
-                    data-certificates="{{ resume.resume_certificates }}"
+                    data-education="{{ resume.resume_education}}"
+                    data-experience="{{ resume.resume_experience}}"
+                    data-tech-skills="{{ resume.resume_tech_skills}}"
+                    data-soft-skills="{{ resume.resume_soft_skills}}"
+                    data-certificates="{{ resume.resume_certificates}}"
                     data-status="{{ resume.resume_status }}"
-                    data-summary="{{ resume.resume_summary }}">
+                    data-date-added="{{ resume.resume_date_added|date:'Y-m-d' }}"
+                    data-path="{{ resume.resume_path }}"
+                    data-job-applied-id="{{ resume.resume_job_id }}">
                         <td>{{ resume.resume_id }}</td>
                         <td class="candidate-name">{{ resume.resume_name }}</td>
                         <td class="candidate-email">{{ resume.resume_email }}</td>
                         <td class="candidate-phone">{{ resume.resume_phone }}</td>
-                        <td class="candidate-added-date">{{ resume.resume_date_added }}</td>
-                        <td>
+                        <td class="candidate-added-date">{{ resume.resume_date_added|date:"M d, Y" }}</td>
+                        <td class="candidate-status">
                             <span class="pill {% if resume.resume_status == 'Passed' %}pill-Passed 
                                                {% elif resume.resume_status == 'Pending' %}pill-Pending
                                                {% else %}pill-Rejected{% endif %}">
@@ -355,7 +124,6 @@
                                     name: '{{ resume.resume_name|escapejs }}',
                                     email: '{{ resume.resume_email|escapejs }}',
                                     phone: '{{ resume.resume_phone|escapejs }}',
-                                    text: '{{ resume.resume_text|escapejs|linebreaksbr }}',
                                     education: '{{ resume.resume_education|escapejs }}',
                                     experience: '{{ resume.resume_experience|escapejs }}',
                                     skills: '{{ resume.resume_tech_skills|escapejs }}'.split(','),
@@ -363,7 +131,7 @@
                                     certificates: '{{ resume.resume_certificates|escapejs }}'.split(','),
                                     job_applied: '{{ resume.resume_job_id.job_position|escapejs }}',
                                     status: '{{ resume.resume_status|escapejs }}',
-                                    date_added: '{{ resume.resume_date_added|date:'M. d, Y, g a' }}',
+                                    date_added: '{{ resume.resume_date_added|date:'M d, Y' }}',
                                     cv_path: '{{ resume.resume_path|escapejs }}'
                                 })">
                             </i>
@@ -413,12 +181,31 @@
             <p><strong>✉️ Email:</strong> <span id="infoEmail"></span></p>
             <p><strong>📞 Phone Number:</strong> <span id="infoPhone"></span></p>
             <hr>
-            <p><strong>🎓 Education:</strong> <span id="infoEducation"></span></p>
-            <p><strong>💼 Experience:</strong> <span id="infoExperience"></span></p>
-            <p><strong>⚙️ Technical Skills:</strong> <span id="infoSkills"></span></p>
-            <p><strong>💡 Soft Skills:</strong> <span id="infoSoftSkills"></span></p>
-            <p><strong>📜 Certificates:</strong> <span id="infoCertificates"></span></p>
-            <p><strong>📝 Job Applied:</strong> <span id="infoJobApplied"></span></p>
+
+            <p><strong>🎓 Education:</strong> 
+                <span id="infoEducation" class="ai-section">No Info</span>
+            </p>
+     
+            <p><strong>💼 Experience:</strong> 
+                <span id="infoExperience" class="ai-section">No Info</span>
+            </p>
+    
+            <p><strong>⚙️ Technical Skills:</strong> 
+                <span id="infoSkills" class="ai-section">No Info</span>
+            </p>
+    
+            <p><strong>💡 Soft Skills:</strong> 
+                <span id="infoSoftSkills" class="ai-section">No Info</span>
+            </p>
+    
+            <p><strong>📜 Certificates:</strong> 
+                <span id="infoCertificates" class="ai-section">No Info</span>
+            </p>
+    
+            <p><strong>📝 Job Applied:</strong> 
+                <span id="infoJobApplied" class="ai-section"></span>
+            </p>
+    
             <hr>
             <p><strong>📈 Results:</strong> <span id="infoResults"></span></p>
             <p><strong>📅 CV Added Date:</strong> <span id="infoAddedDate"></span></p>
@@ -449,7 +236,7 @@
     </div>
 
     <!-- Modal edit resume info -->
-    <div class="modal fade" id="editResumeModal" tabindex="-1" aria-labelledby="editResumeModalLabel" aria-hidden="true">
+    <div class="modal fade" id="editResumeModal" tabindex="-1" aria-labelledby="editResumeModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -459,86 +246,87 @@
                 <div class="modal-body">
                     <form id="editResumeForm">
                         {% csrf_token %}
-                        <input type="hidden" name="job_id" id="editResumeId">
-
+                        <input type="hidden" name="resume_id" id="editResumeId">
+                    
                         <div class="mb-3">
-                            <label class="form-label">Position Name</label>
-                            <input type="text" class="form-control" id="editJobPosition" name="job_position">
+                            <label class="form-label">Candidate Name</label>
+                            <input type="text" class="form-control" id="editResumeName" name="resume_name">
                         </div>
-
+                    
                         <div class="mb-3">
-                            <label class="form-label">Job Description</label>
-                            <textarea class="form-control" id="editJobDescription" name="job_description"></textarea>
+                            <label class="form-label">Email</label>
+                            <textarea class="form-control" id="editResumeEmail" name="resume_email"></textarea>
                         </div>
-
+                    
                         <div class="mb-3">
-                            <label class="form-label">Education</label>
-                            <input type="text" class="form-control" id="editJobEducation" name="job_education">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" id="editResumePhone" name="resume_phone">
                         </div>
-
+                    
+                        <div class="mb-3">
+                            <label class="form-label">Education Level</label>
+                            <input class="form-control" id="editResumeEducation" name="resume_education">
+                        </div>
+                    
                         <div class="mb-3">
                             <label class="form-label">Experience Level</label>
-                            <select class="form-control" id="editJobExperience" name="job_experience">
-                                <option value="NR">Not requirement</option>
-                                <option value="LT1">Less than 1 year</option>
-                                <option value="1Y">1 year</option>
-                                <option value="2Y">2 years</option>
-                                <option value="3Y">3 years</option>
-                                <option value="4Y">4 years</option>
-                                <option value="5Y">5 years</option>
-                                <option value="GT5">Greater than 5 years</option>
-                            </select>                            
+                            <input type="number" class="form-control" id="editResumeExperience" name="resume_experience">
                         </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Responsibilities</label>
-                            <textarea class="form-control" id="editJobResponsibilities" name="job_responsibilities"></textarea>
-                        </div>
-
+                    
                         <div class="mb-3">
                             <label class="form-label">Technical Skills</label>
-                            <input type="text" class="form-control" id="editJobTechSkills" name="job_tech_skills">
+                            <input type="text" class="form-control" id="editResumeTechSkills" name="resume_tech_skills">
                         </div>
-
+                    
                         <div class="mb-3">
                             <label class="form-label">Soft Skills</label>
-                            <input type="text" class="form-control" id="editJobSoftSkills" name="job_soft_skills">
+                            <input type="text" class="form-control" id="editResumeSoftSkills" name="resume_soft_skills">
                         </div>
-
+                    
                         <div class="mb-3">
                             <label class="form-label">Certificates</label>
-                            <input type="text" class="form-control" id="editJobCertificates" name="job_certificates">
+                            <input type="text" class="form-control" id="editResumeCertificates" name="resume_certificates">
                         </div>
-
+                    
                         <div class="mb-3">
-                            <label class="form-label">Status</label>
-                            <select class="form-control" id="editJobStatus" name="job_status">
-                                <option value="Open">Open</option>
-                                <option value="Closed">Closed</option>
+                            <label class="form-label">Results</label>
+                            <select class="form-control" id="editResumeStatus" name="resume_status">
+                                <option value="Passed">Passed</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Rejected">Rejected</option>
                             </select>
                         </div>
-
+                    
                         <div class="mb-3">
-                            <label class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="editJobStart" name="job_start">
+                            <label class="form-label">Added Date</label>
+                            <input type="date" class="form-control" id="editResumeAdded" name="resume_date_added">
                         </div>
-
+                    
                         <div class="mb-3">
-                            <label class="form-label">End Date</label>
-                            <input type="date" class="form-control" id="editJobEnd" name="job_end">
+                            <label class="form-label">Job Applied</label>
+                            <select class="form-control" id="editResumeJobApplied" name="resume_job_id">
+                                <option value="">-- Select Job --</option>
+                                {% for job in jobs %}
+                                    <option value="{{ job.job_id }}">{{ job.job_position }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>                        
+                    
+                        <div class="mb-3">
+                            <label class="form-label">File Path</label>
+                            <input type="text" class="form-control" id="editResumeFilePath" name="resume_file_path" readonly>
                         </div>
-
+                    
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="submit" class="btn btn-primary">Save changes</button>
                         </div>
-                    </form>
+                    </form>                    
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- JS Demo (giống job.html) -->
     <script>
         let tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         let tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -558,29 +346,70 @@
         function showInfo(resume) {
             let modal = document.getElementById('infoModal');
             let overlay = document.getElementById('overlay');
+
+            // Mặc định ẩn toàn bộ <p> chi tiết
+            // (Để khi mỗi lần mở modal mới, ta bật trở lại nếu có dữ liệu)
+            const educationP = document.getElementById('infoEducation').closest('p');
+            const experienceP = document.getElementById('infoExperience').closest('p');
+            const techSkillsP = document.getElementById('infoSkills').closest('p');
+            const softSkillsP = document.getElementById('infoSoftSkills').closest('p');
+            const certificatesP = document.getElementById('infoCertificates').closest('p');
+            
+            educationP.style.display = 'none';
+            experienceP.style.display = 'none';
+            techSkillsP.style.display = 'none';
+            softSkillsP.style.display = 'none';
+            certificatesP.style.display = 'none';
+            
+            // Điền các thông tin chung
+            document.getElementById('infoTitle').innerText = "Candidate Info";
+            document.getElementById('infoName').innerText = resume.name;
+            document.getElementById('infoEmail').innerText = resume.email;
+            document.getElementById('infoPhone').innerText = resume.phone;
+            document.getElementById('infoResults').innerText = resume.status;
+            document.getElementById('infoAddedDate').innerText = resume.date_added;
+            document.getElementById('infoPath').innerText = resume.cv_path;
+            document.getElementById('infoJobApplied').innerText = resume.job_applied;
+            
+            // If Exist, show the details
+            // Education
+            if (resume.education && resume.education !== "None") {
+                document.getElementById('infoEducation').innerText = resume.education;
+                educationP.style.display = 'block';
+            }
         
-            // Điền thông tin vào modal
-            document.getElementById('infoTitle').innerText =  "Candidate Info";
-            document.getElementById('infoName').innerText = resume.name || '';
-            document.getElementById('infoEmail').innerText = resume.email || '';
-            document.getElementById('infoPhone').innerText = resume.phone || '';
-            document.getElementById('infoEducation').innerText = resume.education || '';
-            document.getElementById('infoExperience').innerText = resume.experience || '';
-            document.getElementById('infoSkills').innerText = resume.skills ? resume.skills.join(', ') : '';
-            document.getElementById('infoSoftSkills').innerText = resume.softSkills ? resume.softSkills.join(', ') : '';
-            document.getElementById('infoCertificates').innerText = resume.certificates || '';
-            document.getElementById('infoResults').innerText = resume.status || '';
-            document.getElementById('infoAddedDate').innerText = resume.date_added || '';
-            document.getElementById('infoJobApplied').innerText = resume.job_applied|| '';
-            document.getElementById('infoPath').innerText = resume.cv_path || '';
+            // Experience
+            if (resume.experience && parseFloat(resume.experience) > 0) {
+                document.getElementById('infoExperience').innerText = resume.experience + " năm";
+                experienceP.style.display = 'block';
+            }
         
-            // Hiển thị overlay và modal với animation
+            // Technical Skills
+            if (resume.skills && resume.skills.length > 0 && resume.skills[0] !== "") {
+                document.getElementById('infoSkills').innerText = resume.skills.join(', ');
+                techSkillsP.style.display = 'block';
+            }
+        
+            // Soft Skills
+            if (resume.softSkills && resume.softSkills.length > 0 && resume.softSkills[0] !== "") {
+                document.getElementById('infoSoftSkills').innerText = resume.softSkills.join(', ');
+                softSkillsP.style.display = 'block';
+            }
+        
+            // Certificates
+            if (resume.certificates && resume.certificates.length > 0 && resume.certificates[0] !== "") {
+                document.getElementById('infoCertificates').innerText = resume.certificates.join(', ');
+                certificatesP.style.display = 'block';
+            }
+        
+            // Hiển thị overlay và modal
             overlay.style.display = "block";
             setTimeout(() => overlay.classList.add("show"), 10);
         
             modal.style.display = "block";
             setTimeout(() => modal.classList.add("show"), 10);
         }
+
     
         function closeInfo() {
             let modal = document.getElementById('infoModal');
@@ -639,82 +468,126 @@
     </script>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            document.querySelectorAll(".edit-btn").forEach(function (button) {
-                button.addEventListener("click", function () {
-                    let row = this.closest("tr"); // Tìm dòng cha chứa dữ liệu
-                
-                    // Lấy dữ liệu từ `data-*`
-                    document.getElementById("editJobId").value = row.dataset.jobId;
-                    document.getElementById("editJobPosition").value = row.dataset.title;
-                    document.getElementById("editJobDescription").value = row.dataset.description;
-                    document.getElementById("editJobEducation").value = row.dataset.education;
-                    document.getElementById("editJobExperience").value = row.dataset.experience;
-                    document.getElementById("editJobResponsibilities").value = row.dataset.responsibilities;
-                    document.getElementById("editJobTechSkills").value = row.dataset.techSkills;
-                    document.getElementById("editJobSoftSkills").value = row.dataset.softSkills;
-                    document.getElementById("editJobCertificates").value = row.dataset.certificates;
-                    document.getElementById("editJobStatus").value = row.dataset.status;
-                    document.getElementById("editJobStart").value = row.dataset.start
-                    ? row.dataset.start.replace(" ", "T").substring(0, 16)
-                    : "";
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".edit-btn").forEach(function (button) {
+        button.addEventListener("click", function () {
+            let row = this.closest("tr"); // Tìm dòng cha chứa dữ liệu
 
-                document.getElementById("editJobEnd").value = row.dataset.end
-                    ? row.dataset.end.replace(" ", "T").substring(0, 16)
-                    : "";
+            // Lấy dữ liệu từ `data-*` và điền vào form
+            document.getElementById("editResumeId").value = row.dataset.resumeId;
+            document.getElementById("editResumeName").value = row.dataset.name;
+            document.getElementById("editResumeEmail").value = row.dataset.email;
+            document.getElementById("editResumePhone").value = row.dataset.phone;
+            document.getElementById("editResumeEducation").value = row.dataset.education;
+            document.getElementById("editResumeExperience").value = row.dataset.experience;
+            document.getElementById("editResumeTechSkills").value = row.dataset.techSkills;
+            document.getElementById("editResumeSoftSkills").value = row.dataset.softSkills;
+            document.getElementById("editResumeCertificates").value = row.dataset.certificates;
+            document.getElementById("editResumeStatus").value = row.dataset.status;
+            document.getElementById("editResumeAdded").value = row.dataset.dateAdded || "";
+            document.getElementById("editResumeFilePath").value = row.dataset.path;
 
-                
-                    // Hiển thị modal Edit
-                    let modal = new bootstrap.Modal(document.getElementById("editJobModal"));
-                    modal.show();
-                });
-            });
+            // Cập nhật phần Job Applied
+            document.getElementById("editResumeJobApplied").value = row.dataset.jobAppliedId || '';
+
+            // Hiển thị modal Edit
+            let modal = new bootstrap.Modal(document.getElementById("editResumeModal"));
+            modal.show();
         });
+    });
+});
 
-        document.getElementById("editJobForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent page reload
+document.getElementById("editResumeForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Ngăn chặn reload trang
 
-            let formData = new FormData(this);
-            formData.append("action", "edit"); // Ensure the action is sent
+    let formData = new FormData(this);
+    formData.append("action", "edit"); // Xác định đây là yêu cầu chỉnh sửa
 
-            fetch("{% url 'job' %}", {
-                method: "POST",
-                headers: { "X-CSRFToken": "{{ csrf_token }}" },
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    let row = document.querySelector(`tr[data-job-id='${data.job_id}']`);
-                
-                    if (row) {
-                        row.dataset.title = formData.get("job_position");
-                        row.dataset.description = formData.get("job_description");
-                        row.dataset.education = formData.get("job_education");
-                        row.dataset.experience = formData.get("job_experience");
-                        row.dataset.responsibilities = formData.get("job_responsibilities");
-                        row.dataset.techSkills = formData.get("job_tech_skills");
-                        row.dataset.softSkills = formData.get("job_soft_skills");
-                        row.dataset.certificates = formData.get("job_certificates");
-                        row.dataset.status = formData.get("job_status");
-                        row.dataset.start = formData.get("job_start");
-                        row.dataset.end = formData.get("job_end");
-                    
-                        // Update UI instantly
-                        row.querySelector(".job-position").innerText = formData.get("job_position");
-                        row.querySelector(".job-description").innerText = formData.get("job_description");
-                        row.querySelector(".pill").innerText = formData.get("job_status");
-                        row.querySelector(".job-start").innerText = formData.get("job_start");
-                    }
-                
-                    // Hide modal after saving
-                    let modal = bootstrap.Modal.getInstance(document.getElementById("editJobModal"));
-                    modal.hide();
+    fetch("{% url 'candidates' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Tìm dòng (row) tương ứng với resume đã chỉnh sửa
+            let row = document.querySelector(`tr[data-resume-id='${data.resume_id}']`);
+            if (row) {
+                // Sử dụng đúng tên trường: resume_date_added
+                row.dataset.name = formData.get("resume_name");
+                row.dataset.email = formData.get("resume_email");
+                row.dataset.phone = formData.get("resume_phone");
+                row.dataset.education = formData.get("resume_education");
+                row.dataset.experience = formData.get("resume_experience");
+                row.dataset.techSkills = formData.get("resume_tech_skills");
+                row.dataset.softSkills = formData.get("resume_soft_skills");
+                row.dataset.certificates = formData.get("resume_certificates");
+                row.dataset.status = formData.get("resume_status");
+                row.dataset.dateAdded = formData.get("resume_date_added"); // Sửa ở đây
+                row.dataset.jobAppliedId = formData.get("resume_job_id");
+
+                // Cập nhật giao diện hiển thị
+                row.querySelector(".candidate-name").innerText = formData.get("resume_name");
+                row.querySelector(".candidate-email").innerText = formData.get("resume_email");
+                row.querySelector(".candidate-phone").innerText = formData.get("resume_phone");
+                row.querySelector(".candidate-status span").innerText = formData.get("resume_status");
+
+                // Cập nhật class cho trạng thái
+                const statusSpan = row.querySelector(".candidate-status span");
+                statusSpan.classList.remove("pill-Passed", "pill-Pending", "pill-Rejected");
+                if (formData.get("resume_status") === "Passed") {
+                    statusSpan.classList.add("pill-Passed");
+                } else if (formData.get("resume_status") === "Pending") {
+                    statusSpan.classList.add("pill-Pending");
                 } else {
-                    alert("Error updating job.");
+                    statusSpan.classList.add("pill-Rejected");
                 }
-            })
-            .catch(error => console.error("Error:", error));
-        });
+            }
+
+            // Đóng modal
+            let modal = bootstrap.Modal.getInstance(document.getElementById("editResumeModal"));
+            modal.hide();
+        } else {
+            // Nếu có lỗi, có thể log ra để debug
+            console.error("Form errors:", data.errors);
+            alert("Error updating resume. Please check the console for more details.");
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
     </script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const uploadArea = document.getElementById("uploadArea");
+        const uploadBtn = document.getElementById("uploadBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        const uploadInput = document.getElementById("uploadInput");
+        const uploadForm = document.getElementById("uploadForm");
+    
+        // Khi click vào vùng upload-area hoặc nút "Upload":
+        uploadArea.addEventListener("click", function(e) {
+            // Chặn nếu người dùng click chính xác nút Clear
+            if (e.target === uploadBtn) return;
+            uploadInput.click();
+        });
+        uploadBtn.addEventListener("click", function(e) {
+            e.stopPropagation(); // để không gọi lại sự kiện trên uploadArea
+            uploadInput.click();
+        });
+
+        // Khi người dùng chọn xong file/folder:
+        uploadInput.addEventListener("change", function() {
+            if (uploadInput.files.length === 0) {
+                alert("No files selected!");
+                return;
+            }
+            // Gửi form lên server (POST) -> gọi hàm ResumeReader trong views
+            uploadForm.submit();
+        });
+    });
+    </script>
+    
 {% endblock content %}

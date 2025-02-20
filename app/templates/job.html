@@ -8,345 +8,8 @@
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
-    <style>
-        /* ========== Keyframes & Transitions ========== */
-        @keyframes fadeBody {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-        @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ------------------------------
-                    CONTENT
-        ------------------------------ */
-        .content {
-            margin-left: 250px;
-            padding: 40px;
-            transition: all 0.3s ease;
-            animation: fadeBody 0.1s ease-in-out;
-        }
-
-        /* ------------------------------
-                    TABLE
-        ------------------------------ */
-        .table-container {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
-            width: calc(94vw - 210px);
-            position: relative;
-            animation: fadeUp 0.5s ease-in-out;
-        }
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table tbody tr:hover {
-            background-color: #f1f3f5;
-            transition: background-color 0.2s ease;
-        }
-
-        /* Action icons */
-        .btn-primary {
-            background: #007bff;
-            border: none;
-            border-radius: 6px;
-            transition: transform 0.2s ease, background-color 0.2s;
-            position: relative;
-            overflow: hidden; /* Để ripple không tràn */
-        }
-        .btn-primary:hover {
-            background: #0056b3;
-            transform: scale(1.05);
-        }
-
-        /* Ripple effect (demo) */
-        .btn-primary:active::after {
-            content: "";
-            position: absolute;
-            width: 100px; 
-            height: 100px;
-            background: rgba(255,255,255,0.4);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            top: var(--y);
-            left: var(--x);
-            pointer-events: none;
-        }
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-
-        .action-icons i:hover {
-            transform: scale(1.1);
-            transition: 0.2s;
-        }
-
-        /* ------------------------------
-           MODAL INFO
-        ------------------------------ */
-        .info-modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.9);
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
-            display: none;
-            z-index: 1000;
-            min-width: 300px;
-            opacity: 0;
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-        }
-
-        /* When modal is active (fades & zooms in) */
-        .info-modal.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* Animation when closing */
-        .info-modal.hide {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.9);
-        }
-
-                /* Bootstrap Modal Fade */
-                .modal.fade .modal-dialog {
-            transform: translateY(-50px);
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
-            opacity: 0;
-        }
-        .modal.fade.show .modal-dialog {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .confirm-delete-modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%) scale(0.95);
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            padding: 20px;
-            width: 320px;
-            max-width: 90%;
-            z-index: 1500;
-            display: none;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-        .confirm-delete-modal.show {
-            display: block;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-        .confirm-delete-modal .modal-body {
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Show the overlay with fade-in effect */
-        .overlay.show {
-            display: block;
-            opacity: 1;
-        }
-
-        /* Hide overlay smoothly when closing */
-        .overlay.hide {
-            opacity: 0;
-        }
-
-        /* Pagination */
-        .pagination-container {
-            position: absolute;
-            bottom: 10px; right: 10px;
-            display: flex;
-            align-items: center;
-            font-size: 14px;
-            color: #555;
-        }
-        .pagination {
-            display: flex;
-            align-items: center;
-            margin-left: 15px;
-        }
-        .pagination button {
-            background: none;
-            border: none;
-            padding: 5px 8px;
-            margin: 0 3px;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #007bff;
-        }
-        .pagination button:hover {
-            background-color: rgba(0,123,255,0.1);
-        }
-        .pagination button:disabled {
-            color: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* Rows per page */
-        .row-control {
-            display: flex;
-            align-items: center;
-        }
-        .row-control label {
-            margin-right: 5px;
-        }
-        .row-control select {
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            padding: 5px 8px;
-            font-size: 14px;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-        }
-
-        /* Responsive media */
-        @media (max-width: 992px) {
-          .content {
-              margin-left: 0;
-              padding: 20px;
-          }
-          .table-container {
-              width: 100% !important;
-              margin: 0 auto;
-          }
-        }
-
-        /* Tooltip styling */
-        .tooltip-inner {
-            background-color: #333;
-            color: #fff;
-            border-radius: 4px;
-            padding: 6px 8px;
-            font-size: 13px;
-        }
-        .tooltip-arrow {
-            color: #333;
-        }
-
-        /* Search bar */
-        .search-bar {
-            display: inline-flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .search-bar i {
-            margin-right: 8px;
-            color: #aaa;
-        }
-        .search-bar input[type="text"] {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            padding: 6px 12px;
-            width: 250px;
-        }
-
-        /* Toast (demo) */
-        #toastMessage {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            min-width: 200px;
-            background: #28a745;
-            color: #fff;
-            padding: 12px 16px;
-            border-radius: 6px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: all 0.4s ease;
-            z-index: 2000;
-        }
-        #toastMessage.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-
-        /* ========== MINI STATS ========== */
-        .mini-stats {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 20px;
-            animation: fadeUp 0.5s ease-in-out;
-        }
-        .stats-card {
-            flex: 1;
-            background: #fff;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            transition: transform 0.3s;
-        }
-        .stats-card:hover {
-            transform: translateY(-3px);
-        }
-        .stats-title {
-            font-size: 14px;
-            color: #666;
-        }
-        .stats-value {
-            font-size: 20px;
-            font-weight: 600;
-            margin-top: 5px;
-            color: #333;
-        }
-
-        /* Pill status */
-        .pill {
-          display: inline-block;
-          padding: 4px 10px;
-          border-radius: 20px;
-          font-size: 0.85rem;
-          color: #fff;
-          font-weight: 500;
-        }
-        .pill-open {
-          background: #198754;
-        }
-        .pill-closed {
-          background: #e71c1c;
-        }
-
-    </style>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
 <body>
@@ -405,17 +68,17 @@
                     <tbody>
                         {% for job in jobs %}
                         <tr data-job-id="{{ job.job_id }}"
-                        data-title="{{ job.job_position }}"
-                        data-description="{{ job.job_description }}"
-                        data-education="{{ job.job_education }}"
-                        data-experience="{{ job.job_experience }}"
-                        data-responsibilities="{{ job.job_responsibilities|escapejs }}"
-                        data-tech-skills="{{ job.job_tech_skills }}"
-                        data-soft-skills="{{ job.job_soft_skills }}"
-                        data-certificates="{{ job.job_certificates }}"
-                        data-status="{{ job.job_status }}"
-                        data-start="{{ job.job_start }}"
-                        data-end="{{ job.job_end }}">
+                        data-title="{{ job.job_position|default_if_none:'' }}"
+                        data-description="{{ job.job_description|default_if_none:'' }}"
+                        data-education="{{ job.job_education|default_if_none:'' }}"
+                        data-experience="{{ job.job_experience|default_if_none:'' }}"
+                        data-responsibilities="{{ job.job_responsibilities|escapejs|default_if_none:'' }}"
+                        data-tech-skills="{{ job.job_tech_skills|escapejs|default_if_none:'' }}"
+                        data-soft-skills="{{ job.job_soft_skills|escapejs|default_if_none:'' }}"
+                        data-certificates="{{ job.job_certificates|default_if_none:'' }}"
+                        data-status="{{ job.job_status|default_if_none:'' }}"
+                        data-start="{{ job.job_start|date:'Y-m-d'|default_if_none:'' }}"
+                        data-end="{{ job.job_end|date:'Y-m-d'|default_if_none:'' }}">
                             <td>{{ job.job_id }}</td>
                             <td class = "job-position">{{ job.job_position }}</td>
                             <td class = "job-description">{{ job.job_description }}</td>
@@ -424,7 +87,7 @@
                                     {{ job.job_status }}
                                 </span>
                             </td>
-                            <td>{{ job.job_start|date:"Y-m-d" }}</td>
+                            <td class = "job-start-date">{{ job.job_start|date:"M d, Y" }}</td>
                             <td class="action-icons">
                                 <i class="fas fa-edit text-primary edit-btn" title="Edit"></i>
                                 <i class="fas fa-trash-alt text-danger" title="Delete" onclick = "confirmDelete({{ job.job_id }})"></i>
@@ -452,13 +115,6 @@
 
                 <!-- Pagination & Rows per page -->
                 <div class="pagination-container">
-                    <div class="row-control">
-                        <label for="rowSelect">Rows per page:</label>
-                        <select id="rowSelect" onchange="updateRowsPerPage()"> <!-- Need logic -->
-                            <option value="5">5</option>
-                            <option value="10">10</option>
-                        </select>
-                    </div>
                     <div class="pagination">
                         <button id="prevPage" onclick="changePage(-1)" disabled>
                             <i class="fas fa-chevron-left"></i>
@@ -720,19 +376,7 @@
             document.getElementById('infoEducation').innerText = job.education;
             document.getElementById('infoExperience').innerText = job.experience;
             document.getElementById('infoCertificates').innerText = job.certificates || 'None';
-                
-        /////////////FIX THIS AS SOON AS POSSIBLE///////////
-            let respList = document.getElementById('infoResponsibilities');
-            respList.innerHTML = '';
-            if (job.responsibilities) {
-                job.responsibilities.forEach(r => {
-                    let li = document.createElement('li');
-                    li.innerText = r;
-                    respList.appendChild(li);
-                });
-            }
-        ////////////////////////////////////////////////////
-
+            document.getElementById('infoResponsibilities').innerText = job.responsibilities ? job.responsibilities.join('\n') : '';
             document.getElementById('infoSkills').innerText = job.skills ? job.skills.join(', ') : '';
             document.getElementById('infoSoftSkills').innerText = job.softSkills ? job.softSkills.join(', ') : '';
             document.getElementById('infoJobCreatedDate').innerText = job.date || '';
@@ -866,7 +510,7 @@
                     ? row.dataset.start.replace(" ", "T").substring(0, 16)
                     : "";
                                 
-                document.getElementById("editJobEnd").value = row.dataset.end
+                    document.getElementById("editJobEnd").value = row.dataset.end
                     ? row.dataset.end.replace(" ", "T").substring(0, 16)
                     : "";
 
@@ -879,11 +523,11 @@
         });
 
         document.getElementById("editJobForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent page reload
-                
+            event.preventDefault(); // Ngăn chặn reload trang
+
             let formData = new FormData(this);
-            formData.append("action", "edit"); // Ensure the action is sent
-                
+            formData.append("action", "edit"); // Xác định đây là yêu cầu chỉnh sửa
+
             fetch("{% url 'job' %}", {
                 method: "POST",
                 headers: { "X-CSRFToken": "{{ csrf_token }}" },
@@ -892,8 +536,8 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Cập nhật dữ liệu trong bảng
                     let row = document.querySelector(`tr[data-job-id='${data.job_id}']`);
-                
                     if (row) {
                         row.dataset.title = formData.get("job_position");
                         row.dataset.description = formData.get("job_description");
@@ -907,14 +551,29 @@
                         row.dataset.start = formData.get("job_start");
                         row.dataset.end = formData.get("job_end");
                     
-                        // Update UI instantly
+                        // Cập nhật giao diện hiển thị
                         row.querySelector(".job-position").innerText = formData.get("job_position");
                         row.querySelector(".job-description").innerText = formData.get("job_description");
-                        row.querySelector(".pill").innerText = formData.get("job_status");
-                        row.querySelector(".job-start").innerText = formData.get("job_start");
+                        row.querySelector(".job-status span").innerText = formData.get("job_status");
+
+
+                        row.querySelector(".job-start-date").innerText = new Date(formData.get("job_start")).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                        })
+
+
+                        if (formData.get("job_status") === "Open") {
+                            row.querySelector(".job-status span").classList.add("pill-open");
+                            row.querySelector(".job-status span").classList.remove("pill-closed");
+                        } else {
+                            row.querySelector(".job-status span").classList.add("pill-closed");
+                            row.querySelector(".job-status span").classList.remove("pill-open");
+                        }
                     }
                 
-                    // Hide modal after saving
+                    // Đóng modal
                     let modal = bootstrap.Modal.getInstance(document.getElementById("editJobModal"));
                     modal.hide();
                 } else {
