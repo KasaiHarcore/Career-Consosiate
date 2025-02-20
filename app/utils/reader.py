@@ -1,6 +1,6 @@
 import os
 import re
-import pandas as pd
+import datetime
 from pdf2image import convert_from_path
 import pytesseract
 import textract
@@ -22,7 +22,6 @@ class ResumeReader():
     """
 
     def __init__(self, input_path: str):
-        self.resumes_data = []
         self.existing_files = set()
 
         # Determine input type (folder, list of files, single file)
@@ -37,7 +36,7 @@ class ResumeReader():
 
         self.process_files()
         
-    def _get_files_from_folder(self, folder_path):
+    def _get_files_from_folder(self, folder_path: str):
         """Retrieve all valid resume files from the given folder."""
         valid_extensions = ('.pdf', '.docx', '.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')
         files = []
@@ -54,7 +53,7 @@ class ResumeReader():
         """Process each file based on its format (PDF, DOCX, Images)."""
         for file_path in self.files:
             # Check for duplicate files in the database
-            if ResumeStorage.objects.filter(resume_path=file_path).exists():
+            if ResumeStorage.objects.filter(resume_path = file_path).exists():
                 log.print_output(f"Skipping existing file: {os.path.basename(file_path)}")
                 continue
             
@@ -74,14 +73,16 @@ class ResumeReader():
             # Extract personal information and encrypt email/phone
             extracted_info, encrypt_text = self.extract_candidate_info(resume_content)
             
-
-            # Append extracted data
-            self.resumes_data.append({
-                'File': os.path.abspath(file_path),
-                'Resume': encrypt_text,
-                'Email': extracted_info['email'],
-                'Phone': extracted_info['phone'],
-            })
+            # Save extracted information to the database
+            ResumeStorage.objects.create(
+                resume_name = "Manually added",
+                resume_email = extracted_info['email'],
+                resume_phone = extracted_info['phone'],
+                resume_path = file_path,
+                resume_text = encrypt_text,
+                resume_date_added = datetime.datetime.now(),
+                resume_status = "Pending"
+            )
 
     def _process_pdf(self, file_path: str, config=''):
         """Process PDF files by converting them to images and extracting text using OCR."""
@@ -160,8 +161,3 @@ class ResumeReader():
         # Return email and phone and updated resume text
         return {"email": email_match.group() if email_match else "No email found",
                 "phone": phone_match.group() if phone_match else "No phone number found"}, resume_text
-
-
-    def get_dataframe(self):
-        """Return a pandas DataFrame containing all extracted resume data."""
-        return pd.DataFrame(self.resumes_data)
