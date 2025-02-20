@@ -1,94 +1,79 @@
-import os
-import datetime
-import pandas as pd
 import log
+
+from base.models import ResumeStorage
+from ai_logics import build_ai_prompt, call_ai_model, parse_ai_response
+from utils.util import parse_list_to_string, parse_float_safe
 import globals
 
-from utils import util, parse
-from model import common
-from model.register import register_all_models
-from base.models import ResumeStorage
-
-# Register AI models
-register_all_models()
-common.set_model('openrouter/meta-llama/llama-3.1-70b-instruct:free')  # AI model
-
-def parse_resumes(data: pd.DataFrame, job_description: str, custom_prompt: str) -> bool:
+def parse_resumes(resume_ids: list, job_description: str, custom_prompt: str) -> bool:
     """
     Parses and processes resumes by calling an AI model for scoring and extracting details.
 
     Args:
-        data (pd.DataFrame): DataFrame containing resume file paths and extracted text.
-        job_description (str): The job description to compare against resumes.
-        custom_prompt (str): Custom prompt to refine the AI model's response.
+        data: DataFrame containing resume file paths and extracted text.
+        job_description: The job description to compare against resumes.
+        custom_prompt: Custom prompt to refine the AI model's response.
 
     Returns:
         bool: Returns True when processing is completed.
     """
-    # Validate DataFrame
-    if data.empty:
-        log.print_error("Error: No resume data found to process.")
+    resumes = ResumeStorage.objects.filter(resume_id__in = resume_ids)
+
+    if not resumes.exists():
+        log.print_error("No resumes found for processing.")
         return False
 
-    log.print_with_time(f"Processing {len(data)} resumes...")
+    log.print_with_time(f" Processing {len(resumes)} resumes...")
 
-    # Iterate over DataFrame rows using .iterrows()
-    for index, row in data.iterrows():
+    for resume in resumes:
         try:
-            # Extract resume file path and text from DataFrame row
-            file_path = row['File']
-            file_name = os.path.basename(file_path)
-            resume_text = row['Resume']
+            log.print_with_time(f"Processing resume: {resume.resume_path}")
 
-            log.print_with_time(f"Processing resume {index + 1}/{len(data)}: {file_name}")
 
-            # Construct prompt for AI model
-            model_prompt = (
-                globals.scoring_system_prompt +
-                "\nUSER: " + custom_prompt +
-                globals.return_format_prompt +
-                "\nCONTENT: \nHere is the resume:\n" + resume_text +
-                "\n\nHere is the job description:\n" + job_description
+            model_prompt = build_ai_prompt(
+                resume_text=resume.resume_text,
+                job_description=job_description,
+                custom_prompt=custom_prompt
             )
 
-            # Call AI model for processing
-            response_content, cost, input_tokens, output_tokens = common.SELECTED_MODEL.call(
-                response_format="text",
-                messages=[{"role": "user", "content": model_prompt}]
+            response_content = call_ai_model(model_prompt)
+
+            response_data = parse_ai_response(response_content)
+            if not response_data:
+                log.print_error(f"Error parsing resume {resume.resume_path}. Skipping.")
+                globals.failed.append(resume.resume_path)
+                continue
+
+            resume.resume_education = parse_list_to_string(
+                response_data.get("Education", resume.resume_education or "No Info")
+            )
+            resume.resume_experience = parse_float_safe(
+                response_data.get("Experience", resume.resume_experience or 0.0)
+            )
+            resume.resume_tech_skills = parse_list_to_string(
+                response_data.get("Technical Skills", resume.resume_tech_skills or "No Info")
+            )
+            resume.resume_soft_skills = parse_list_to_string(
+                response_data.get("Soft Skills", resume.resume_soft_skills or "No Info")
+            )
+            resume.resume_certificates = parse_list_to_string(
+                response_data.get("Certificates", resume.resume_certificates or "No Info")
+            )
+            resume.resume_summary = response_data.get(
+                "Summary Comment", resume.resume_summary or "No Info"
+            )
+            resume.resume_score = parse_float_safe(
+                response_data.get("Score", resume.resume_score or 0.0)
+            )
+            resume.resume_AI_explanation = response_data.get(
+                "Explanation", resume.resume_AI_explanation or "No Info"
             )
 
-            # Log AI model details
-            log.print_llm(f"Cost: {cost}, Input Tokens: {input_tokens}, Output Tokens: {output_tokens}")
-            log.print_llm(f"Model Response: {response_content}")
-
-            # Parse model response safely
-            response_data = util.data_filter(response_content)
-
-            # Store resume details in the database
-            ResumeStorage.objects.create(
-                resume_name="Manually added",
-                resume_email=row['Email'],
-                resume_phone=row['Phone'],
-                resume_path=file_path,
-                resume_text=resume_text,
-                resume_date_added=datetime.datetime.now(),
-                resume_education=response_data.get("Education", ""),
-                resume_experience=response_data.get("Experience", 0.0),
-                resume_tech_skills=response_data.get("Technical Skills", ""),
-                resume_soft_skills=response_data.get("Soft Skills", ""),
-                resume_certificates=response_data.get("Certificates", ""),
-                resume_summary=response_data.get("Summary Comment", ""),
-                resume_score=response_data.get("Score", 0.0),
-                resume_AI_explanation=response_data.get("Explanation", "")
-            )
-
-        except KeyError as ke:
-            log.print_error(f"KeyError in response parsing for resume {index + 1}: Missing key {ke}")
-            globals.failed.append(file_name)
+            resume.save()
 
         except Exception as e:
-            log.print_error(f"Unexpected error while processing resume {index + 1}: {e}")
-            globals.failed.append(file_name)
+            log.print_error(f"Error processing resume {resume.resume_path}: {e}")
+            globals.failed.append(resume.resume_path)
 
-    log.print_with_time("Resume processing completed.")
+    log.print_with_time("Completed processing resumes.")
     return True
