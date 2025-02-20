@@ -34,4 +34,5 @@ class ResumeForm(forms.ModelForm):
             'resume_certificates': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter certificates'}),
             'resume_summary': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Enter summary'}),
             'resume_status': forms.Select(attrs={'class': 'form-select'}),
+            'resume_job_id': forms.Select(attrs={'class': 'form-select'}),
         }
