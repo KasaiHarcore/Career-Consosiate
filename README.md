@@ -6,10 +6,10 @@ Career-Consosiate is web-like AI-driven application designed to assist human res
 # Installation & Setup
 Follow the steps below to install and run the application:
 ### 1. Prerequisites
-- **Tesseract** OCR (for optical character recognition"
+- **Tesseract** OCR (for optical character recognition)
   - Download: [Tesseract](https://github.com/tesseract-ocr/tesseract)
-- **Poppler** (for processing PDF files
-  - Download: [Poppler for Windoes](https://github.com/oschwartz10612/poppler-windows)
+- **Poppler** (for processing PDF files)
+  - Download: [Poppler for Windows](https://github.com/oschwartz10612/poppler-windows)
 
 After installation, place the installed files in the `./app/utils` directory.
 
